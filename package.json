@@ -18,11 +18,11 @@
     "arabic",
     "english"
   ],
-  "author": "Sahih al-Bukhari Collection",
+  "author": "muhammadsaadamin",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/sahih-al-bukhari.git"
+    "url": "https://github.com/SENODROOM/sahih-al-bukhari.git"
   },
   "files": [
     "index.js",
