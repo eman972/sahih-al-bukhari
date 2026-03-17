@@ -5,7 +5,7 @@
 ![npm version](https://img.shields.io/npm/v/sahih-al-bukhari?style=for-the-badge&logo=npm)
 ![npm downloads](https://img.shields.io/npm/dt/sahih-al-bukhari?style=for-the-badge&logo=npm)
 ![npm downloads per month](https://img.shields.io/npm/dm/sahih-al-bukhari?style=for-the-badge&logo=npm)
-![license](https://img.shields.io/npm/l/sahih-al-bukhari?style=for-the-badge&logo=gnu)
+![license](https://img.shields.io/github/license/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=gnu)
 ![node version](https://img.shields.io/node/v/sahih-al-bukhari?style=for-the-badge&logo=node.js)
 ![bundle size](https://img.shields.io/bundlephobia/minzip/sahih-al-bukhari?style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github)
