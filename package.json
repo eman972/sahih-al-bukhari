@@ -1,0 +1,34 @@
+{
+  "name": "sahih-al-bukhari",
+  "version": "1.0.0",
+  "description": "A complete collection of Sahih al-Bukhari hadiths in JSON format with easy programmatic access",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "islam",
+    "hadith",
+    "bukhari",
+    "sahih",
+    "prophet",
+    "muslim",
+    "json",
+    "arabic",
+    "english"
+  ],
+  "author": "Sahih al-Bukhari Collection",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/sahih-al-bukhari.git"
+  },
+  "files": [
+    "index.js",
+    "bukhari.json"
+  ],
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
