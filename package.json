@@ -1,6 +1,6 @@
 {
   "name": "sahih-al-bukhari",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A complete collection of Sahih al-Bukhari hadiths in JSON format with easy programmatic access",
   "main": "index.js",
   "type": "module",
