@@ -1,9 +1,11 @@
 // Browser/bundler entry — webpack, Vite, React, Vue, etc.
-// Imports the JSON directly so bundlers can tree-shake and inline it.
-// Usage: import bukhari from 'sahih-al-bukhari'
-//        import { Bukhari } from 'sahih-al-bukhari'
+// Uses require() for JSON so no import assertions needed (works with all babel versions)
+// Usage:
+//   import bukhari from 'sahih-al-bukhari'
+//   import { Bukhari } from 'sahih-al-bukhari'
 
-import bukhariData from './bin/bukhari.json' assert { type: 'json' };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const bukhariData = require('./bin/bukhari.json');
 
 export class Bukhari {
   constructor(data) {
@@ -32,9 +34,11 @@ export class Bukhari {
           default:          return target[prop];
         }
       },
-      ownKeys: (target) => ['length',
+      ownKeys: (target) => [
+        'length',
         ...Array.from({ length: target.length }, (_, i) => String(i)),
-        'books', 'metadata', 'chapters', 'getByBook', 'getByChapter', 'search', 'getRandom']
+        'books', 'metadata', 'chapters', 'getByBook', 'getByChapter', 'search', 'getRandom'
+      ]
     });
   }
 }
