@@ -2,71 +2,17 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createBukhari } from '../index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load the Bukhari data
 const bukhariData = JSON.parse(fs.readFileSync(path.join(__dirname, 'bukhari.json'), 'utf8'));
-
-// Extract hadiths array for easy access
-const hadiths = bukhariData.hadiths;
-
-// Group hadiths by book for structured access
-const books = {};
-hadiths.forEach(hadith => {
-  const bookId = hadith.bookId;
-  if (!books[bookId]) {
-    books[bookId] = [];
-  }
-  books[bookId].push(hadith);
-});
-
-// Create the main export object that allows array-like access
-const bukhari = new Proxy(hadiths, {
-  get(target, prop) {
-    if (!isNaN(prop)) {
-      return target[parseInt(prop)];
-    }
-    if (prop in target) {
-      return target[prop];
-    }
-    switch (prop) {
-      case 'books':
-        return books;
-      case 'metadata':
-        return bukhariData.metadata;
-      case 'chapters':
-        return bukhariData.chapters;
-      case 'getByBook':
-        return (bookId) => books[bookId] || [];
-      case 'getByChapter':
-        return (chapterId) => hadiths.filter(h => h.chapterId === chapterId);
-      case 'search':
-        return (query) => hadiths.filter(h =>
-          h.english?.text?.toLowerCase().includes(query.toLowerCase()) ||
-          h.english?.narrator?.toLowerCase().includes(query.toLowerCase())
-        );
-      case 'getRandom':
-        return () => hadiths[Math.floor(Math.random() * hadiths.length)];
-      case 'length':
-        return target.length;
-      default:
-        return target[prop];
-    }
-  },
-  ownKeys(target) {
-    return ['length', ...Array.from({length: target.length}, (_, i) => i.toString()), 'books', 'metadata', 'chapters', 'getByBook', 'getByChapter', 'search', 'getRandom'];
-  }
-});
+const bukhari = createBukhari(bukhariData);
 
 export default bukhari;
 
 // ── CLI entry point ───────────────────────────────────────────────────────────
-// Windows-safe: normalize paths to lowercase and unify slashes before comparing.
-// npm on Windows runs the bin via a generated .cmd shim, so process.argv[1]
-// will be the shim path (e.g. C:\...\bukhari), NOT this file's path.
-// We therefore also accept any argv[1] whose basename is "bukhari".
 function isRunDirectly() {
   if (!process.argv[1]) return false;
   const argv1 = path.resolve(process.argv[1]).toLowerCase().replace(/\\/g, '/');
@@ -77,75 +23,51 @@ function isRunDirectly() {
 
 if (isRunDirectly()) {
   const rawArgs = process.argv.slice(2);
-
-  // ── Parse flags ──────────────────────────────────────────────────────────
-  // Flags: --arabic / -a  → Arabic only
-  //        --both   / -b  → Arabic + English
-  //        --english/ -e  → English only (default)
   const flags   = rawArgs.filter(a => a.startsWith('-'));
   const numArgs = rawArgs.filter(a => !a.startsWith('-'));
 
-  const showArabic  = flags.some(f => f === '--arabic'  || f === '-a');
-  const showBoth    = flags.some(f => f === '--both'    || f === '-b');
-  const showEnglish = !showArabic || showBoth; // always true unless -a without -b
-
-  // With --both, show both; with --arabic, Arabic only; default = English only
+  const showArabic   = flags.some(f => f === '--arabic'  || f === '-a');
+  const showBoth     = flags.some(f => f === '--both'    || f === '-b');
   const printArabic  = showArabic || showBoth;
   const printEnglish = !showArabic || showBoth;
 
   function printHadith(hadith) {
-    if (!hadith) {
-      console.error('Hadith not found.');
-      process.exit(1);
-    }
-    const chapter = bukhariData.chapters?.find(c => c.id === hadith.chapterId);
-    const chapterAr = bukhariData.chapters?.find(c => c.id === hadith.chapterId)?.arabic || '';
+    if (!hadith) { console.error('Hadith not found.'); process.exit(1); }
+    const chapter   = bukhariData.chapters?.find(c => c.id === hadith.chapterId);
+    const chapterAr = chapter?.arabic || '';
     const div = '-'.repeat(60);
 
     console.log('\n' + div);
-
-    // Header line — show chapter name in the relevant language
     if (printArabic && !printEnglish) {
-      // Arabic-only header
       console.log('حديث #' + hadith.id + '  |  كتاب: ' + hadith.bookId + '  |  باب: ' + hadith.chapterId + (chapterAr ? ' - ' + chapterAr : ''));
     } else {
-      const chapterEn = chapter ? ' - ' + chapter.english : '';
-      console.log('Hadith #' + hadith.id + '  |  Book: ' + hadith.bookId + '  |  Chapter: ' + hadith.chapterId + chapterEn);
+      console.log('Hadith #' + hadith.id + '  |  Book: ' + hadith.bookId + '  |  Chapter: ' + hadith.chapterId + (chapter ? ' - ' + chapter.english : ''));
     }
-
     console.log(div);
 
-    // English block
     if (printEnglish) {
       if (hadith.english?.narrator) console.log('\n' + hadith.english.narrator);
       if (hadith.english?.text)     console.log('\n' + hadith.english.text);
     }
-
-    // Arabic block
     if (printArabic) {
-      if (printEnglish) console.log('\n' + div); // separator between the two
+      if (printEnglish) console.log('\n' + div);
       if (hadith.arabic) console.log('\n' + hadith.arabic);
     }
-
     console.log('\n' + div + '\n');
   }
 
-  // ── Resolve hadith from numeric args ─────────────────────────────────────
   function resolveHadith(numArgs) {
     if (numArgs.length === 1) {
       const id = parseInt(numArgs[0]);
       if (isNaN(id)) return null;
-      return hadiths.find(h => h.id === id);
+      return bukhariData.hadiths.find(h => h.id === id);
     }
     if (numArgs.length === 2) {
       const chapterId = parseInt(numArgs[0]);
       const hadithNum = parseInt(numArgs[1]);
       if (isNaN(chapterId) || isNaN(hadithNum)) return null;
-      const inChapter = hadiths.filter(h => h.chapterId === chapterId);
-      if (inChapter.length === 0) {
-        console.error('No chapter found with id ' + chapterId + '.');
-        process.exit(1);
-      }
+      const inChapter = bukhariData.hadiths.filter(h => h.chapterId === chapterId);
+      if (inChapter.length === 0) { console.error('No chapter found with id ' + chapterId + '.'); process.exit(1); }
       return inChapter.find(h => h.id === hadithNum) ?? inChapter[hadithNum - 1];
     }
     return null;
@@ -161,9 +83,6 @@ if (isRunDirectly()) {
   }
 
   const hadith = resolveHadith(numArgs);
-  if (!hadith) {
-    console.error('Invalid arguments. Usage: bukhari <hadithId> [--arabic|-a|--both|-b]');
-    process.exit(1);
-  }
+  if (!hadith) { console.error('Invalid arguments. Usage: bukhari <hadithId> [--arabic|-a|--both|-b]'); process.exit(1); }
   printHadith(hadith);
 }
