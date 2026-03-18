@@ -1,16 +1,19 @@
-// ESM browser-safe entry
-// Works in: React, Vue, Vite, webpack, Next.js (client)
-// Usage:
-//   import Bukhari from 'sahih-al-bukhari'
-//   import { Bukhari } from 'sahih-al-bukhari'
-//   const bukhari = new Bukhari(data)
-//   bukhari[23], bukhari.search('prayer'), etc.
+// CommonJS entry — require('sahih-al-bukhari')
+// Works in: Node.js (Express, serverless, etc.)
+'use strict';
 
-export class Bukhari {
+const fs   = require('fs');
+const path = require('path');
+
+const bukhariData = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'bin', 'bukhari.json'), 'utf8')
+);
+
+class Bukhari {
   constructor(bukhariData) {
-    this._data     = bukhariData;
-    this._hadiths  = bukhariData.hadiths;
-    this._books    = {};
+    this._data    = bukhariData;
+    this._hadiths = bukhariData.hadiths;
+    this._books   = {};
 
     this._hadiths.forEach(hadith => {
       if (!this._books[hadith.bookId]) this._books[hadith.bookId] = [];
@@ -19,8 +22,8 @@ export class Bukhari {
 
     return new Proxy(this._hadiths, {
       get: (target, prop) => {
-        if (!isNaN(prop))    return target[parseInt(prop)];
-        if (prop in target)  return target[prop];
+        if (!isNaN(prop))   return target[parseInt(prop)];
+        if (prop in target) return target[prop];
         switch (prop) {
           case 'books':        return this._books;
           case 'metadata':     return bukhariData.metadata;
@@ -45,4 +48,7 @@ export class Bukhari {
   }
 }
 
-export default Bukhari;
+const bukhari = new Bukhari(bukhariData);
+module.exports = bukhari;
+module.exports.Bukhari = Bukhari;
+module.exports.default = bukhari;
