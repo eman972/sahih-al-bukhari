@@ -25,17 +25,12 @@ hadiths.forEach(hadith => {
 // Create the main export object that allows array-like access
 const bukhari = new Proxy(hadiths, {
   get(target, prop) {
-    // Handle numeric indices for direct access like bukhari[23]
     if (!isNaN(prop)) {
       return target[parseInt(prop)];
     }
-    
-    // Handle property access
     if (prop in target) {
       return target[prop];
     }
-    
-    // Handle special methods
     switch (prop) {
       case 'books':
         return books;
@@ -48,7 +43,7 @@ const bukhari = new Proxy(hadiths, {
       case 'getByChapter':
         return (chapterId) => hadiths.filter(h => h.chapterId === chapterId);
       case 'search':
-        return (query) => hadiths.filter(h => 
+        return (query) => hadiths.filter(h =>
           h.english?.text?.toLowerCase().includes(query.toLowerCase()) ||
           h.english?.narrator?.toLowerCase().includes(query.toLowerCase())
         );
@@ -60,7 +55,6 @@ const bukhari = new Proxy(hadiths, {
         return target[prop];
     }
   },
-  
   ownKeys(target) {
     return ['length', ...Array.from({length: target.length}, (_, i) => i.toString()), 'books', 'metadata', 'chapters', 'getByBook', 'getByChapter', 'search', 'getRandom'];
   }
@@ -69,11 +63,19 @@ const bukhari = new Proxy(hadiths, {
 export default bukhari;
 
 // ── CLI entry point ───────────────────────────────────────────────────────────
-// Usage:
-//   bukhari <hadithId>            → show hadith by its global ID
-//   bukhari <chapterId> <hadithId> → show hadith #<hadithId> within chapter
-// ─────────────────────────────────────────────────────────────────────────────
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+// Windows-safe: normalize paths to lowercase and unify slashes before comparing.
+// npm on Windows runs the bin via a generated .cmd shim, so process.argv[1]
+// will be the shim path (e.g. C:\...\bukhari), NOT this file's path.
+// We therefore also accept any argv[1] whose basename is "bukhari".
+function isRunDirectly() {
+  if (!process.argv[1]) return false;
+  const argv1 = path.resolve(process.argv[1]).toLowerCase().replace(/\\/g, '/');
+  const self  = __filename.toLowerCase().replace(/\\/g, '/');
+  const base  = path.basename(argv1).replace(/\.js$/, '');
+  return argv1 === self || base === 'bukhari';
+}
+
+if (isRunDirectly()) {
   const args = process.argv.slice(2);
 
   function printHadith(hadith) {
@@ -82,39 +84,42 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
       process.exit(1);
     }
     const chapter = bukhariData.chapters?.find(c => c.id === hadith.chapterId);
-    console.log('\n' + '─'.repeat(60));
-    console.log(`Hadith #${hadith.id}  |  Book: ${hadith.bookId}  |  Chapter: ${hadith.chapterId}${chapter ? ` – ${chapter.english}` : ''}`);
-    console.log('─'.repeat(60));
-    if (hadith.english?.narrator) console.log(`\n${hadith.english.narrator}`);
-    if (hadith.english?.text)     console.log(`\n${hadith.english.text}`);
-    console.log('\n' + '─'.repeat(60) + '\n');
+    const div = '-'.repeat(60);
+    console.log('\n' + div);
+    console.log('Hadith #' + hadith.id + '  |  Book: ' + hadith.bookId + '  |  Chapter: ' + hadith.chapterId + (chapter ? ' - ' + chapter.english : ''));
+    console.log(div);
+    if (hadith.english?.narrator) console.log('\n' + hadith.english.narrator);
+    if (hadith.english?.text)     console.log('\n' + hadith.english.text);
+    console.log('\n' + div + '\n');
   }
 
   if (args.length === 1) {
-    // bukhari <hadithId>  — find by global hadith id
     const id = parseInt(args[0]);
-    if (isNaN(id)) { console.error('Usage: bukhari <hadithId>  OR  bukhari <chapterId> <hadithId>'); process.exit(1); }
-    const hadith = hadiths.find(h => h.id === id);
-    printHadith(hadith);
+    if (isNaN(id)) {
+      console.error('Usage: bukhari <hadithId>  OR  bukhari <chapterId> <hadithId>');
+      process.exit(1);
+    }
+    printHadith(hadiths.find(h => h.id === id));
 
   } else if (args.length === 2) {
-    // bukhari <chapterId> <hadithId>  — nth hadith within a chapter
     const chapterId = parseInt(args[0]);
-    const hadithNum  = parseInt(args[1]);
+    const hadithNum = parseInt(args[1]);
     if (isNaN(chapterId) || isNaN(hadithNum)) {
       console.error('Usage: bukhari <hadithId>  OR  bukhari <chapterId> <hadithId>');
       process.exit(1);
     }
     const inChapter = hadiths.filter(h => h.chapterId === chapterId);
-    if (inChapter.length === 0) { console.error(`No chapter found with id ${chapterId}.`); process.exit(1); }
-    // Support both: exact hadith id OR positional index within chapter
+    if (inChapter.length === 0) {
+      console.error('No chapter found with id ' + chapterId + '.');
+      process.exit(1);
+    }
     const hadith = inChapter.find(h => h.id === hadithNum) ?? inChapter[hadithNum - 1];
     printHadith(hadith);
 
   } else {
     console.log('Usage:');
-    console.log('  node index.js <hadithId>              → hadith by global id');
-    console.log('  node index.js <chapterId> <hadithId>  → hadith within a chapter');
+    console.log('  bukhari <hadithId>               - show hadith by global id');
+    console.log('  bukhari <chapterId> <hadithId>   - show hadith within a chapter');
     process.exit(0);
   }
 }

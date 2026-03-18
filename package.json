@@ -1,10 +1,10 @@
 {
   "name": "sahih-al-bukhari",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A complete collection of Sahih al-Bukhari hadiths in JSON format with easy programmatic access",
-  "main": "index.js",
+  "main": "./bin/index.js",
   "bin": {
-    "bukhari": "./index.js"
+    "bukhari": "./bin/index.js"
   },
   "type": "module",
   "scripts": {
@@ -28,8 +28,8 @@
     "url": "https://github.com/SENODROOM/sahih-al-bukhari.git"
   },
   "files": [
-    "index.js",
-    "bukhari.json"
+    "bin/index.js",
+    "bin/bukhari.json"
   ],
   "engines": {
     "node": ">=14.0.0"
