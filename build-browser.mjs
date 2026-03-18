@@ -1,4 +1,49 @@
-// AUTO-GENERATED — do not edit manually. Run: node build-browser.mjs
+// node build-browser.mjs
+// Splits bukhari.json into per-chapter chunk files for lazy loading
+// Also generates index.browser.js (lightweight, no data baked in)
+
+import fs   from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dataPath  = path.join(__dirname, 'bin', 'bukhari.json');
+const chunksDir = path.join(__dirname, 'chunks');
+
+console.log('Reading bukhari.json...');
+const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+
+// ── 1. Write chunks/meta.json (metadata + chapters, no hadiths — tiny) ───────
+if (!fs.existsSync(chunksDir)) fs.mkdirSync(chunksDir);
+
+const meta = {
+  metadata: data.metadata,
+  chapters: data.chapters,
+  totalHadiths: data.hadiths.length,
+};
+fs.writeFileSync(path.join(chunksDir, 'meta.json'), JSON.stringify(meta), 'utf8');
+console.log('Written chunks/meta.json');
+
+// ── 2. Write chunks/chapter-{id}.json (one file per chapter) ─────────────────
+const byChapter = {};
+data.hadiths.forEach(h => {
+  if (!byChapter[h.chapterId]) byChapter[h.chapterId] = [];
+  byChapter[h.chapterId].push(h);
+});
+
+let count = 0;
+for (const [chapterId, hadiths] of Object.entries(byChapter)) {
+  fs.writeFileSync(
+    path.join(chunksDir, `chapter-${chapterId}.json`),
+    JSON.stringify(hadiths),
+    'utf8'
+  );
+  count++;
+}
+console.log(`Written ${count} chapter chunk files to chunks/`);
+
+// ── 3. Write index.browser.js (lightweight — no data inside) ─────────────────
+const browserEntry = `// AUTO-GENERATED — do not edit manually. Run: node build-browser.mjs
 //
 // Lightweight browser entry — loads data lazily per chapter
 // Works in: React, Vue, Vite, webpack, Next.js, any bundler
@@ -52,16 +97,16 @@ export class Bukhari {
 export class LazyBukhari {
   static async load(chapterIds, baseUrl = 'https://cdn.jsdelivr.net/npm/sahih-al-bukhari/chunks') {
     const results = await Promise.all(
-      chapterIds.map(id => fetch(`${baseUrl}/chapter-${id}.json`).then(r => r.json()))
+      chapterIds.map(id => fetch(\`\${baseUrl}/chapter-\${id}.json\`).then(r => r.json()))
     );
     const hadiths = results.flat();
-    const metaRes = await fetch(`${baseUrl}/meta.json`);
+    const metaRes = await fetch(\`\${baseUrl}/meta.json\`);
     const meta    = await metaRes.json();
     return new Bukhari({ hadiths, metadata: meta.metadata, chapters: meta.chapters });
   }
 
   static async loadAll(baseUrl = 'https://cdn.jsdelivr.net/npm/sahih-al-bukhari/chunks') {
-    const meta = await fetch(`${baseUrl}/meta.json`).then(r => r.json());
+    const meta = await fetch(\`\${baseUrl}/meta.json\`).then(r => r.json());
     const chapterIds = meta.chapters.map(c => c.id);
     return LazyBukhari.load(chapterIds, baseUrl);
   }
@@ -80,7 +125,7 @@ class _LazyProxy {
         }
         if (!self._instance && !self._warned) {
           self._warned = true;
-          console.warn('[sahih-al-bukhari] Synchronous access before data loaded. Use `await bukhari.ready` first.');
+          console.warn('[sahih-al-bukhari] Synchronous access before data loaded. Use \`await bukhari.ready\` first.');
           self._loading = self._loading || LazyBukhari.loadAll().then(b => { self._instance = b; });
           return undefined;
         }
@@ -95,3 +140,12 @@ class _LazyProxy {
 }
 
 export default new _LazyProxy();
+`;
+
+fs.writeFileSync(path.join(__dirname, 'index.browser.js'), browserEntry, 'utf8');
+console.log('Written index.browser.js (' + (browserEntry.length / 1024).toFixed(1) + ' KB — lightweight!)');
+console.log('');
+console.log('Done! Summary:');
+console.log('  index.browser.js  : ' + (browserEntry.length / 1024).toFixed(1) + ' KB');
+console.log('  chunks/meta.json  : metadata + chapters only');
+console.log('  chunks/chapter-*  : ' + count + ' files, loaded on demand');

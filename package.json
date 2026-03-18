@@ -1,50 +1,38 @@
 {
   "name": "sahih-al-bukhari",
-  "version": "1.4.0",
-  "description": "A complete collection of Sahih al-Bukhari hadiths in JSON format with easy programmatic access",
+  "version": "2.0.0",
+  "description": "A complete collection of Sahih al-Bukhari hadiths. Tiny package, data served from CDN.",
   "type": "module",
-  "main": "./index.cjs",
+  "main":   "./index.cjs",
   "module": "./index.browser.js",
+  "types":  "./index.d.ts",
   "exports": {
     ".": {
+      "types":   "./index.d.ts",
       "browser": "./index.browser.js",
       "require": "./index.cjs",
-      "import": "./index.node.js"
+      "import":  "./index.node.js"
     },
-    "./bin/bukhari.json": "./bin/bukhari.json"
+    "./chapters/*": "./chapters/*"
   },
-  "bin": {
-    "bukhari": "./bin/index.js"
-  },
+  "bin": { "bukhari": "./bin/index.js" },
   "scripts": {
-    "test": "node test.js"
+    "build":          "node build.mjs",
+    "prepublishOnly": "node build.mjs"
   },
-  "keywords": [
-    "islam",
-    "hadith",
-    "bukhari",
-    "sahih",
-    "prophet",
-    "muslim",
-    "json",
-    "arabic",
-    "english"
-  ],
+  "keywords": ["islam","hadith","bukhari","sahih","prophet","muslim","json","arabic","english","quran"],
   "author": "muhammadsaadamin",
   "license": "AGPL-3.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/SENODROOM/sahih-al-bukhari.git"
-  },
+  "repository": { "type": "git", "url": "https://github.com/SENODROOM/sahih-al-bukhari.git" },
   "files": [
     "index.js",
     "index.browser.js",
     "index.cjs",
     "index.node.js",
+    "index.d.ts",
     "bin/index.js",
-    "bin/bukhari.json"
+    "bin/bukhari.json",
+    "chapters/"
   ],
-  "engines": {
-    "node": ">=14.0.0"
-  }
+  "engines": { "node": ">=14.0.0" }
 }

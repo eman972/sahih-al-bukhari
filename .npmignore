@@ -1,1 +1,3 @@
-LICENSE
+build.mjs
+package-lock.json
+.git/
