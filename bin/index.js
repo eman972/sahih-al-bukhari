@@ -46,12 +46,10 @@ const printEnglish = !showArabic || showBoth;
 
 // ── --version ─────────────────────────────────────────────────────────────────
 if (wantsVersion) {
-  const bookCount = Object.keys(bukhariData.hadiths.reduce((a, h) => (a[h.bookId]=1,a), {})).length;
   console.log('');
   console.log('  sahih-al-bukhari v' + pkg.version);
   console.log('  Total hadiths : ' + bukhariData.hadiths.length);
   console.log('  Total chapters: ' + bukhariData.chapters.length);
-  console.log('  Total books   : ' + bookCount);
   console.log('');
   process.exit(0);
 }
@@ -117,17 +115,10 @@ function _load() {
       meta.chapters.map(c => fetch(CDN + '/' + c.id + '.json').then(r => r.json()))
     ).then(results => {
       const hadiths = results.flat();
-      const books   = {};
-      hadiths.forEach(h => {
-        if (!books[h.bookId]) books[h.bookId] = [];
-        books[h.bookId].push(h);
-      });
       _cache = Object.assign([], hadiths, {
-        books,
         metadata:     meta.metadata,
         chapters:     meta.chapters,
         get:          (id) => hadiths.find(h => h.id === id),
-        getByBook:    (id) => books[id] || [],
         getByChapter: (id) => hadiths.filter(h => h.chapterId === id),
         search:       (q)  => hadiths.filter(h =>
           h.english?.text?.toLowerCase().includes(q.toLowerCase()) ||
@@ -217,9 +208,9 @@ function printHadith(hadith) {
   const div     = '-'.repeat(60);
   console.log('\n' + div);
   if (printArabic && !printEnglish) {
-    console.log('حديث #' + hadith.id + '  |  كتاب: ' + hadith.bookId + '  |  باب: ' + hadith.chapterId + (chapter?.arabic ? ' - ' + chapter.arabic : ''));
+    console.log('حديث #' + hadith.id + '  |  باب: ' + hadith.chapterId + (chapter?.arabic ? ' - ' + chapter.arabic : ''));
   } else {
-    console.log('Hadith #' + hadith.id + '  |  Book: ' + hadith.bookId + '  |  Chapter: ' + hadith.chapterId + (chapter?.english ? ' - ' + chapter.english : ''));
+    console.log('Hadith #' + hadith.id + '  |  Chapter: ' + hadith.chapterId + (chapter?.english ? ' - ' + chapter.english : ''));
   }
   console.log(div);
   if (printEnglish) {

@@ -1,8 +1,5 @@
 // Node ESM entry — auto-loads bukhari.json from disk
 // Works in: Node.js ESM (type:module), Next.js API routes, Astro SSR, etc.
-// Usage:
-//   import Bukhari from 'sahih-al-bukhari'
-//   import { Bukhari } from 'sahih-al-bukhari'
 
 import fs   from 'fs';
 import path from 'path';
