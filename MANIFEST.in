@@ -1,21 +1,19 @@
-# MANIFEST.in — controls what gets included in the Python sdist
+# MANIFEST.in — controls what goes into the Python sdist
 
-# ── Include shared data files ────────────────────────────────────────────────
-include bin/bukhari.json
-recursive-include chapters *.json
+# ── Shared data folder ───────────────────────────────────────────────────────
+include data/bukhari.json.gz
+# data/chapters/ is generated — not needed in sdist
+# data/bukhari.json (raw) excluded — ship gz only
+exclude data/bukhari.json
+prune data/chapters
 
-# ── Include Python source ────────────────────────────────────────────────────
+# ── Python source ────────────────────────────────────────────────────────────
 recursive-include python *.py
 
-# ── Exclude Docs ────────────────────────────────────────────────────
-prune docs
-
-
-# ── Include standard text files ──────────────────────────────────────────────
+# ── Docs & meta ──────────────────────────────────────────────────────────────
 include README.md
-include LICENSE
-include pyproject.toml
 include CHANGELOG.md
+include pyproject.toml
 
 # ── Exclude ALL JavaScript / npm files ───────────────────────────────────────
 exclude package.json
@@ -23,12 +21,13 @@ exclude package-lock.json
 exclude .npmignore
 exclude .gitignore
 prune src
-prune scripts
 prune types
-prune examples/
-prune examples
+prune scripts
+prune bin
 prune examples/node-commonjs
 prune examples/node-esm
 prune examples/react
+prune examples/express
 prune node_modules
-prune .github/workflows
+prune .github
+prune tests/js

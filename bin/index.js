@@ -3,8 +3,7 @@
 // Usage:
 //   bukhari <hadithId> [-a|-b]
 //   bukhari <chapterId> <hadithId> [-a|-b]
-//   bukhari --search "prayer"
-//   bukhari --search "prayer" --all
+//   bukhari --search "prayer" [--all]
 //   bukhari --random
 //   bukhari --chapter <id>
 //   bukhari --react
@@ -12,18 +11,29 @@
 //   bukhari -v | --version
 
 import fs   from 'fs';
+import zlib from 'zlib';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Bukhari } from '../src/index.js';
 
-const __filename  = fileURLToPath(import.meta.url);
-const __dirname   = path.dirname(__filename);
-const pkg         = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+const pkg        = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
 
-// ── Shared data file: bin/bukhari.json ───────────────────────────────────────
-// This single file is shared between the JS package (read here) and the
-// Python package (read by sahih_al_bukhari/bukhari.py).
-const bukhariData = JSON.parse(fs.readFileSync(path.join(__dirname, 'bukhari.json'), 'utf8'));
+// ── Load shared data/bukhari.json.gz (or .json fallback) ─────────────────────
+function loadData() {
+  const gzPath   = path.join(__dirname, '..', 'data', 'bukhari.json.gz');
+  const jsonPath = path.join(__dirname, '..', 'data', 'bukhari.json');
+  if (fs.existsSync(gzPath)) {
+    return JSON.parse(zlib.gunzipSync(fs.readFileSync(gzPath)).toString('utf8'));
+  }
+  if (fs.existsSync(jsonPath)) {
+    return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  }
+  throw new Error('Data file not found. Expected data/bukhari.json.gz or data/bukhari.json');
+}
+
+const bukhariData = loadData();
 
 // ── Speed: build lookup maps at startup ───────────────────────────────────────
 const _byId      = new Map();
@@ -41,19 +51,11 @@ export { Bukhari };
 
 // ── Colors ────────────────────────────────────────────────────────────────────
 const c = {
-  reset:   '\x1b[0m',
-  bold:    '\x1b[1m',
-  dim:     '\x1b[2m',
-  green:   '\x1b[32m',
-  yellow:  '\x1b[33m',
-  cyan:    '\x1b[36m',
-  white:   '\x1b[37m',
-  magenta: '\x1b[35m',
-  blue:    '\x1b[34m',
-  red:     '\x1b[31m',
-  gray:    '\x1b[90m',
+  reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
+  green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m',
+  white: '\x1b[37m', magenta: '\x1b[35m', blue: '\x1b[34m',
+  red: '\x1b[31m', gray: '\x1b[90m',
 };
-
 const clr     = (color, text) => `${color}${text}${c.reset}`;
 const bold    = (t) => clr(c.bold,    t);
 const green   = (t) => clr(c.green,   t);
@@ -65,18 +67,16 @@ const red     = (t) => clr(c.red,     t);
 const blue    = (t) => clr(c.blue,    t);
 const dim     = (t) => clr(c.dim,     t);
 
-// ── Highlight search term inside text ─────────────────────────────────────────
 function highlight(text, term) {
   if (!term) return text;
   const re = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
   return text.replace(re, `\x1b[1m\x1b[33m$1\x1b[0m`);
 }
 
-// ── Wrap long text to terminal width ──────────────────────────────────────────
 function wrap(text, width = 72, indent = '') {
   const words = text.split(' ');
   const lines = [];
-  let line    = '';
+  let line = '';
   for (const word of words) {
     if ((line + ' ' + word).trim().length > width) {
       if (line) lines.push(indent + line.trim());
@@ -89,7 +89,6 @@ function wrap(text, width = 72, indent = '') {
   return lines.join('\n');
 }
 
-// ── CLI ───────────────────────────────────────────────────────────────────────
 function isRunDirectly() {
   if (!process.argv[1]) return false;
   const argv1 = path.resolve(process.argv[1]).toLowerCase().replace(/\\/g, '/');
@@ -166,7 +165,6 @@ if (searchQuery !== null) {
     h.english?.narrator?.toLowerCase().includes(ql)
   );
   const elapsed = Date.now() - start;
-
   console.log('');
   console.log(DIV2);
   console.log(
@@ -175,42 +173,27 @@ if (searchQuery !== null) {
     gray('  (' + elapsed + 'ms)')
   );
   console.log(DIV2);
-
   if (!results.length) {
     console.log('\n  ' + red('No hadiths found for: ') + yellow('"' + searchQuery + '"') + '\n');
     process.exit(0);
   }
-
   const limit  = wantsAll ? results.length : Math.min(5, results.length);
-  const toShow = results.slice(0, limit);
-
-  toShow.forEach((hadith, i) => {
+  results.slice(0, limit).forEach((hadith, i) => {
     const chapter = bukhariData.chapters.find(c => c.id === hadith.chapterId);
     console.log('');
     console.log(
-      bold(green('  #' + (i + 1))) +
-      gray('  Hadith ' + hadith.id) +
+      bold(green('  #' + (i + 1))) + gray('  Hadith ' + hadith.id) +
       gray('  |  Chapter: ') + cyan(hadith.chapterId) +
       (chapter ? gray(' — ') + dim(chapter.english) : '')
     );
-    if (hadith.english?.narrator) {
-      console.log('  ' + bold(yellow('Narrator: ')) + magenta(hadith.english.narrator));
-    }
-    if (hadith.english?.text) {
-      const wrapped = wrap(highlight(hadith.english.text, searchQuery), 68, '  ');
-      console.log('  ' + wrapped.trimStart());
-    }
+    if (hadith.english?.narrator) console.log('  ' + bold(yellow('Narrator: ')) + magenta(hadith.english.narrator));
+    if (hadith.english?.text) console.log('  ' + wrap(highlight(hadith.english.text, searchQuery), 68, '  ').trimStart());
     console.log(DIV);
   });
-
   if (!wantsAll && results.length > 5) {
-    console.log('');
-    console.log(
-      '  ' + gray('Showing ') + cyan('5') + gray(' of ') + yellow(results.length) +
-      gray(' results.  ') + bold(blue('Run with --all to see all results'))
-    );
-    console.log('  ' + dim('bukhari --search "' + searchQuery + '" --all'));
-    console.log('');
+    console.log('\n  ' + gray('Showing ') + cyan('5') + gray(' of ') + yellow(results.length) +
+      gray(' results.  ') + bold(blue('Run with --all to see all results')));
+    console.log('  ' + dim('bukhari --search "' + searchQuery + '" --all') + '\n');
   }
   process.exit(0);
 }
@@ -219,8 +202,7 @@ if (wantsReact) {
   const cwd      = process.cwd();
   const srcDir   = path.join(cwd, 'src');
   const hooksDir = path.join(srcDir, 'hooks');
-
-  const pkgPath = path.join(cwd, 'package.json');
+  const pkgPath  = path.join(cwd, 'package.json');
   if (!fs.existsSync(pkgPath)) {
     console.error(red('  ✗ No package.json found. Run inside your React project directory.'));
     process.exit(1);
@@ -228,26 +210,19 @@ if (wantsReact) {
   const projectPkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
   const deps = { ...projectPkg.dependencies, ...projectPkg.devDependencies };
   if (!deps['react']) {
-    console.error(red('  ✗ React not found in package.json. Run inside a React project.'));
+    console.error(red('  ✗ React not found. Run inside a React project.'));
     process.exit(1);
   }
   if (!fs.existsSync(srcDir)) {
-    console.error(red('  ✗ No src/ directory found. Are you in the right folder?'));
+    console.error(red('  ✗ No src/ directory found.'));
     process.exit(1);
   }
-  if (!fs.existsSync(hooksDir)) {
-    fs.mkdirSync(hooksDir, { recursive: true });
-    console.log(green('  ✓ Created src/hooks/'));
-  }
-
-  const CDN     = 'https://cdn.jsdelivr.net/npm/sahih-al-bukhari@' + pkg.version + '/chapters';
+  if (!fs.existsSync(hooksDir)) fs.mkdirSync(hooksDir, { recursive: true });
+  const CDN      = 'https://cdn.jsdelivr.net/npm/sahih-al-bukhari@' + pkg.version + '/data/bukhari.json.gz';
   const hookFile = path.join(hooksDir, 'useBukhari.js');
-  const hookSrc = `// Auto-generated by: bukhari --react\nimport { useState, useEffect } from 'react';\nconst CDN = '${CDN}';\nlet _cache = null; let _promise = null; const _subs = new Set();\nfunction _load() {\n  if (_cache) return Promise.resolve(_cache);\n  if (_promise) return _promise;\n  _promise = fetch(CDN + '/meta.json').then(r => r.json()).then(meta =>\n    Promise.all(meta.chapters.map(c => fetch(CDN + '/' + c.id + '.json').then(r => r.json())))\n    .then(results => {\n      const hadiths = results.flat();\n      const _byId = new Map(); hadiths.forEach(h => _byId.set(h.id, h));\n      _cache = Object.assign([], hadiths, {\n        metadata: meta.metadata, chapters: meta.chapters,\n        get: (id) => _byId.get(id),\n        getByChapter: (id) => hadiths.filter(h => h.chapterId === id),\n        search: (q, limit = 0) => { const ql = q.toLowerCase(); const r = hadiths.filter(h => h.english?.text?.toLowerCase().includes(ql) || h.english?.narrator?.toLowerCase().includes(ql)); return limit > 0 ? r.slice(0, limit) : r; },\n        getRandom: () => hadiths[Math.floor(Math.random() * hadiths.length)],\n      });\n      _subs.forEach(fn => fn(_cache)); _subs.clear(); return _cache;\n    }));\n  return _promise;\n}\n_load();\nexport function useBukhari() {\n  const [bukhari, setBukhari] = useState(_cache);\n  useEffect(() => { if (_cache) { setBukhari(_cache); } else { _subs.add(setBukhari); return () => _subs.delete(setBukhari); } }, []);\n  return bukhari;\n}\nexport default useBukhari;\n`;
-
+  const hookSrc  = `// Auto-generated by: bukhari --react\nimport { useState, useEffect } from 'react';\nconst CDN = '${CDN}';\nlet _cache = null; let _promise = null; const _subs = new Set();\nfunction _load() {\n  if (_cache) return Promise.resolve(_cache);\n  if (_promise) return _promise;\n  _promise = fetch(CDN).then(r => r.arrayBuffer()).then(buf => {\n    const stream = new DecompressionStream('gzip');\n    const writer = stream.writable.getWriter();\n    const reader = stream.readable.getReader();\n    writer.write(new Uint8Array(buf)); writer.close();\n    const chunks = [];\n    return (function pump() {\n      return reader.read().then(({ done, value }) => {\n        if (done) {\n          const json = new TextDecoder().decode(new Uint8Array(chunks.reduce((a,b)=>[...a,...b],[])));\n          const data = JSON.parse(json);\n          const hadiths = data.hadiths;\n          const _byId = new Map(); hadiths.forEach(h => _byId.set(h.id, h));\n          _cache = Object.assign([], hadiths, {\n            metadata: data.metadata, chapters: data.chapters,\n            get: id => _byId.get(id),\n            getByChapter: id => hadiths.filter(h => h.chapterId === id),\n            search: (q, limit=0) => { const ql=q.toLowerCase(); const r=hadiths.filter(h=>h.english?.text?.toLowerCase().includes(ql)||h.english?.narrator?.toLowerCase().includes(ql)); return limit>0?r.slice(0,limit):r; },\n            getRandom: () => hadiths[Math.floor(Math.random()*hadiths.length)],\n          });\n          _subs.forEach(fn=>fn(_cache)); _subs.clear(); return _cache;\n        }\n        chunks.push(value); return pump();\n      });\n    })();\n  });\n  return _promise;\n}\n_load();\nexport function useBukhari() {\n  const [bukhari, setBukhari] = useState(_cache);\n  useEffect(() => { if (_cache) { setBukhari(_cache); } else { _subs.add(setBukhari); return () => _subs.delete(setBukhari); } }, []);\n  return bukhari;\n}\nexport default useBukhari;\n`;
   fs.writeFileSync(hookFile, hookSrc, 'utf8');
-  console.log('');
-  console.log('  ' + green('✓') + bold(' Generated: ') + cyan('src/hooks/useBukhari.js'));
-  console.log('');
+  console.log('\n  ' + green('✓') + bold(' Generated: ') + cyan('src/hooks/useBukhari.js') + '\n');
   process.exit(0);
 }
 
@@ -256,39 +231,33 @@ if (wantsHelp || (numArgs.length === 0 && !searchQuery && chapterArg === null &&
   console.log('  ' + bold(cyan('Sahih al-Bukhari CLI')) + gray('  v' + pkg.version));
   console.log('');
   console.log('  ' + bold('Usage:'));
-  console.log('    ' + cyan('bukhari') + yellow(' <hadithId>')                       + gray('                   Show hadith by global ID'));
-  console.log('    ' + cyan('bukhari') + yellow(' <chapterId> <hadithId>')           + gray('       Show hadith within a chapter'));
-  console.log('    ' + cyan('bukhari') + green(' --search') + yellow(' "<query>"')  + gray('            Search hadiths (shows top 5)'));
-  console.log('    ' + cyan('bukhari') + green(' --search') + yellow(' "<query>"') + green(' --all') + gray('    Show all search results'));
-  console.log('    ' + cyan('bukhari') + green(' --chapter') + yellow(' <id>')       + gray('              List all hadiths in a chapter'));
-  console.log('    ' + cyan('bukhari') + green(' --random')                          + gray('                   Show a random hadith'));
+  console.log('    ' + cyan('bukhari') + yellow(' <hadithId>')                      + gray('                   Show hadith by global ID'));
+  console.log('    ' + cyan('bukhari') + yellow(' <chapterId> <hadithId>')          + gray('       Show hadith within a chapter'));
+  console.log('    ' + cyan('bukhari') + green(' --search') + yellow(' "<query>"') + gray('            Search hadiths (top 5)'));
+  console.log('    ' + cyan('bukhari') + green(' --search') + yellow(' "<query>"') + green(' --all') + gray('    Show all results'));
+  console.log('    ' + cyan('bukhari') + green(' --chapter') + yellow(' <id>')      + gray('              List all hadiths in a chapter'));
+  console.log('    ' + cyan('bukhari') + green(' --random')                         + gray('                   Show a random hadith'));
   console.log('');
-  console.log('  ' + bold('Language flags:'));
-  console.log('    ' + green('-a') + gray(', ') + green('--arabic') + gray('                         Arabic only'));
-  console.log('    ' + green('-b') + gray(', ') + green('--both')   + gray('                           Arabic + English'));
+  console.log('  ' + bold('Language flags:') + gray('  (default = English only)'));
+  console.log('    ' + green('-a') + gray(', ') + green('--arabic') + gray('   Arabic only'));
+  console.log('    ' + green('-b') + gray(', ') + green('--both')   + gray('     Arabic + English'));
   console.log('');
   console.log('  ' + bold('Other:'));
-  console.log('    ' + green('--react')  + gray('   Generate useBukhari React hook'));
+  console.log('    ' + green('--react') + gray('    Generate useBukhari React hook'));
+  console.log('    ' + green('-v') + gray(', ') + green('--version') + gray(' Show version'));
   console.log('    ' + green('-h') + gray(', ') + green('--help')    + gray('    Show this help'));
-  console.log('    ' + green('-v') + gray(', ') + green('--version') + gray(' Show version and stats'));
   console.log('');
   process.exit(0);
 }
 
-// ── Print a single hadith ─────────────────────────────────────────────────────
 function printHadith(hadith) {
-  if (!hadith) {
-    console.log('\n  ' + red('Hadith not found.') + '\n');
-    process.exit(1);
-  }
+  if (!hadith) { console.log('\n  ' + red('Hadith not found.') + '\n'); process.exit(1); }
   const chapter = bukhariData.chapters?.find(c => c.id === hadith.chapterId);
   console.log('');
   console.log(DIV2);
-  const headerEn = bold(cyan('Hadith #' + hadith.id)) +
-    gray('  |  Chapter: ') + cyan(hadith.chapterId) +
+  const headerEn = bold(cyan('Hadith #' + hadith.id)) + gray('  |  Chapter: ') + cyan(hadith.chapterId) +
     (chapter?.english ? gray(' — ') + yellow(chapter.english) : '');
-  const headerAr = bold(magenta('حديث #' + hadith.id)) +
-    gray('  |  باب: ') + magenta(hadith.chapterId) +
+  const headerAr = bold(magenta('حديث #' + hadith.id)) + gray('  |  باب: ') + magenta(hadith.chapterId) +
     (chapter?.arabic ? gray(' — ') + magenta(chapter.arabic) : '');
   console.log('  ' + (printArabic && !printEnglish ? headerAr : headerEn));
   console.log(DIV2);
@@ -305,7 +274,6 @@ function printHadith(hadith) {
   console.log('');
 }
 
-// ── Resolve hadith ────────────────────────────────────────────────────────────
 function resolveHadith() {
   if (numArgs.length === 1) {
     const id = parseInt(numArgs[0]);

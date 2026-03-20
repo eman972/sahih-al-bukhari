@@ -1,4 +1,6 @@
 # .npmignore — excludes from `npm publish`
+# Note: package.json "files" whitelist takes priority.
+# This file is a safety net for anything that slips through.
 
 # ── Python package ───────────────────────────────────────────────────────────
 python/
@@ -18,15 +20,9 @@ __pycache__/
 venv/
 env/
 
-# ── docs ───────────────────────────────────────────────────────────
-docs
-docs/
-
-# ── examples ───────────────────────────────────────────────────────────
-examples/
-examples
-examples/flask/
-examples/express/
+# ── Data — raw json excluded, only .gz ships ─────────────────────────────────
+data/bukhari.json
+data/chapters/
 
 # ── Dev / CI ──────────────────────────────────────────────────────────────────
 .git/
@@ -36,10 +32,11 @@ examples/express/
 .DS_Store
 .env
 
-# ── JS build inputs (not needed by consumers) ────────────────────────────────
+# ── Build inputs — not needed by consumers ───────────────────────────────────
 scripts/
 package-lock.json
 CHANGELOG.md
 CONTRIBUTING.md
 docs/
 tests/
+examples/flask/

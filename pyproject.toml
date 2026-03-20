@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "sahih-al-bukhari"
-version = "3.1.1"
-description = "Complete Sahih al-Bukhari — 7,277 hadiths with full Arabic text and English translations. Data loaded from CDN. CLI + Python library."
+version = "3.1.2"
+description = "Complete Sahih al-Bukhari — 7,277 hadiths. Offline-first, zero dependencies. CLI + Python library."
 authors = ["muhammadsaadamin"]
 license = "AGPL-3.0"
 readme = "README.md"
@@ -23,13 +23,13 @@ classifiers = [
 ]
 packages = [{include = "sahih_al_bukhari", from = "python"}]
 include = [
-    "bin/bukhari.json",
-    "chapters/**/*",
+    "data/bukhari.json.gz",
 ]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-requests = "^2.28.0"
+# No mandatory dependencies — data is bundled in data/bukhari.json.gz
+# requests is optional (only used as CDN fallback if data file is missing)
 
 [tool.poetry.scripts]
 bukhari = "sahih_al_bukhari.cli:main"

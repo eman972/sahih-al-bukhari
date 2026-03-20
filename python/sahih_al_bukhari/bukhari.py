@@ -31,6 +31,7 @@ API mirrors the npm package exactly (camelCase method names):
 
 from __future__ import annotations
 
+import gzip
 import json
 import random
 import threading
@@ -46,7 +47,7 @@ CDN_BASE = "https://cdn.jsdelivr.net/npm/sahih-al-bukhari@3.1.1/chapters"
 # from this file to find bin/bukhari.json at the repo root.
 # Layout: <repo>/sahih_al_bukhari/bukhari.py → <repo>/bin/bukhari.json
 _THIS_DIR   = Path(__file__).parent          # sahih_al_bukhari/
-_REPO_ROOT  = _THIS_DIR.parent.parent          # repo root: python/sahih_al_bukhari/ -> python/ -> repo root
+_REPO_ROOT  = _THIS_DIR.parent.parent          # repo root: python/sahih_al_bukhari/ -> python/ -> root
 _SHARED_JSON = _REPO_ROOT / "bin" / "bukhari.json"
 
 # ── Per-path cache (each unique source gets its own cache entry) ──────────────
@@ -276,7 +277,7 @@ class Bukhari:
 def _resolve_cache_key(data_path) -> str:
     if data_path is not None:
         return str(Path(data_path).resolve())
-    if _SHARED_JSON.exists():
+    if _SHARED_JSON.exists() or _SHARED_JSON_FB.exists():
         return "__shared__"
     return "__cdn__"
 
@@ -306,6 +307,8 @@ def _load(data_path=None) -> _Store:
         return _load_from_file(Path(data_path))
     if _SHARED_JSON.exists():
         return _load_from_file(_SHARED_JSON)
+    if _SHARED_JSON_FB.exists():
+        return _load_from_file(_SHARED_JSON_FB)
     return _load_from_cdn()
 
 
