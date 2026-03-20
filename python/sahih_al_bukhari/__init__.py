@@ -17,4 +17,4 @@ Quick start:
 from .bukhari import Bukhari, Hadith, Chapter, Metadata, clear_cache
 
 __all__    = ["Bukhari", "Hadith", "Chapter", "Metadata", "clear_cache"]
-__version__ = "3.1.1"
+__version__ = "3.1.2"

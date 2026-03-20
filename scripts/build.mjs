@@ -12,33 +12,28 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.resolve(__dirname, '..');
 const dataDir   = path.join(ROOT, 'data');
 
-// ── Load bukhari data (gz preferred, json fallback) ───────────────────────────
-function loadData() {
-  const gzPath   = path.join(dataDir, 'bukhari.json.gz');
-  const jsonPath = path.join(dataDir, 'bukhari.json');
-  if (fs.existsSync(gzPath)) {
-    console.log('✓ Reading data/bukhari.json.gz');
-    return JSON.parse(zlib.gunzipSync(fs.readFileSync(gzPath)).toString('utf8'));
-  }
-  if (fs.existsSync(jsonPath)) {
-    console.log('✓ Reading data/bukhari.json');
-    return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
-  }
-  throw new Error('No data file found. Place bukhari.json or bukhari.json.gz in data/');
-}
-
-const data = loadData();
-
-// ── Optional: gzip bukhari.json if not already gzipped ───────────────────────
+// ── Step 1: Load data/bukhari.json (always the source of truth) ──────────────
 const jsonPath = path.join(dataDir, 'bukhari.json');
 const gzPath   = path.join(dataDir, 'bukhari.json.gz');
-if (fs.existsSync(jsonPath) && !fs.existsSync(gzPath)) {
-  const compressed = zlib.gzipSync(fs.readFileSync(jsonPath), { level: 9 });
-  fs.writeFileSync(gzPath, compressed);
-  const before = fs.statSync(jsonPath).size;
-  const after  = compressed.length;
-  console.log(`✓ Compressed: bukhari.json (${(before/1024/1024).toFixed(1)}MB) → bukhari.json.gz (${(after/1024/1024).toFixed(1)}MB)`);
+
+if (!fs.existsSync(jsonPath)) {
+  throw new Error('data/bukhari.json not found. Place your bukhari.json in the data/ folder.');
 }
+console.log('✓ Reading data/bukhari.json ...');
+const raw  = fs.readFileSync(jsonPath);
+const data = JSON.parse(raw.toString('utf8'));
+console.log(`  hadiths : ${data.hadiths.length.toLocaleString()}`);
+console.log(`  chapters: ${data.chapters.length.toLocaleString()}`);
+console.log('');
+
+// ── Step 2: Always recompress json → gz (never stale) ─────────────────────────
+console.log('✓ Compressing data/bukhari.json → data/bukhari.json.gz ...');
+const compressed = zlib.gzipSync(raw, { level: 9 });
+fs.writeFileSync(gzPath, compressed);
+console.log(`  before : ${(raw.length        / 1024 / 1024).toFixed(2)} MB`);
+console.log(`  after  : ${(compressed.length / 1024 / 1024).toFixed(2)} MB`);
+console.log(`  saved  : ${((1 - compressed.length / raw.length) * 100).toFixed(0)}%`);
+console.log('');
 
 // ── 1. data/chapters/meta.json ────────────────────────────────────────────────
 const chaptersDir = path.join(dataDir, 'chapters');
@@ -61,6 +56,7 @@ for (const [id, hadiths] of Object.entries(byChapter)) {
   count++;
 }
 console.log(`✓ Written ${count} chapter files → data/chapters/`);
+console.log('');
 
 // ── 3. src/index.browser.js ───────────────────────────────────────────────────
 const version    = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
@@ -126,5 +122,13 @@ export default loadBukhari();
 
 fs.writeFileSync(path.join(ROOT, 'src', 'index.browser.js'), browserSrc, 'utf8');
 console.log('✓ Written src/index.browser.js');
+console.log('');
+
+// ── Step 5: Copy .gz into python/sahih_al_bukhari/data/ ──────────────────────
+// This makes Poetry include it in the wheel when running python -m build
+const pyDataDir = path.join(ROOT, 'python', 'sahih_al_bukhari', 'data');
+fs.mkdirSync(pyDataDir, { recursive: true });
+fs.copyFileSync(gzPath, path.join(pyDataDir, 'bukhari.json.gz'));
+console.log('✓ Copied bukhari.json.gz → python/sahih_al_bukhari/data/');
 console.log('');
 console.log('Build complete!');

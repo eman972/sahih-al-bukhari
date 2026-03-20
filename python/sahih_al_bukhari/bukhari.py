@@ -38,17 +38,18 @@ import threading
 from pathlib import Path
 from typing import Callable, Dict, Iterator, List, Optional, Union
 
-import requests
 
-CDN_BASE = "https://cdn.jsdelivr.net/npm/sahih-al-bukhari@3.1.1/chapters"
+CDN_BASE = "https://cdn.jsdelivr.net/npm/sahih-al-bukhari@3.1.1/data/chapters"
 
 # ── Shared data file resolution ───────────────────────────────────────────────
 # When installed from the monorepo (development / editable install), walk up
 # from this file to find bin/bukhari.json at the repo root.
 # Layout: <repo>/sahih_al_bukhari/bukhari.py → <repo>/bin/bukhari.json
-_THIS_DIR   = Path(__file__).parent          # sahih_al_bukhari/
-_REPO_ROOT  = _THIS_DIR.parent.parent          # repo root: python/sahih_al_bukhari/ -> python/ -> root
-_SHARED_JSON = _REPO_ROOT / "bin" / "bukhari.json"
+_THIS_DIR       = Path(__file__).parent
+_REPO_ROOT      = _THIS_DIR.parent.parent
+_INSTALLED_DATA = _THIS_DIR / "data" / "bukhari.json.gz"   # inside installed wheel
+_SHARED_JSON    = _REPO_ROOT / "data" / "bukhari.json.gz"  # repo root (dev mode)
+_SHARED_JSON_FB = _REPO_ROOT / "data" / "bukhari.json"     # uncompressed fallback
 
 # ── Per-path cache (each unique source gets its own cache entry) ──────────────
 _cache: Dict[str, "_Store"] = {}
@@ -277,7 +278,7 @@ class Bukhari:
 def _resolve_cache_key(data_path) -> str:
     if data_path is not None:
         return str(Path(data_path).resolve())
-    if _SHARED_JSON.exists() or _SHARED_JSON_FB.exists():
+    if _INSTALLED_DATA.exists() or _SHARED_JSON.exists() or _SHARED_JSON_FB.exists():
         return "__shared__"
     return "__cdn__"
 
@@ -302,13 +303,11 @@ def clear_cache(data_path=None) -> None:
 # ---------------------------------------------------------------------------
 
 def _load(data_path=None) -> _Store:
-    """Priority: explicit path → shared monorepo file → CDN."""
-    if data_path is not None:
-        return _load_from_file(Path(data_path))
-    if _SHARED_JSON.exists():
-        return _load_from_file(_SHARED_JSON)
-    if _SHARED_JSON_FB.exists():
-        return _load_from_file(_SHARED_JSON_FB)
+    """Priority: explicit path → installed wheel → repo root → CDN."""
+    if data_path is not None:        return _load_from_file(Path(data_path))
+    if _INSTALLED_DATA.exists():     return _load_from_file(_INSTALLED_DATA)
+    if _SHARED_JSON.exists():        return _load_from_file(_SHARED_JSON)
+    if _SHARED_JSON_FB.exists():     return _load_from_file(_SHARED_JSON_FB)
     return _load_from_cdn()
 
 
@@ -338,9 +337,13 @@ def _load_from_file(path: Path) -> _Store:
       working-directory surprises with relative paths.
     """
     if not path.exists():
-        raise FileNotFoundError(f"bukhari.json not found: {path}")
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
+        raise FileNotFoundError(f"Data file not found: {path}")
+    if path.suffix == '.gz':
+        with gzip.open(path, 'rt', encoding='utf-8') as f:
+            data = json.load(f)
+    else:
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
     if "hadiths" not in data:
         raise ValueError(f"Missing 'hadiths' key in: {path}")
     return _build_store(data)
@@ -348,6 +351,13 @@ def _load_from_file(path: Path) -> _Store:
 
 def _load_from_cdn() -> _Store:
     """Fetch from jsDelivr CDN — same CDN used by the npm package."""
+    try:
+        import requests
+    except ImportError:
+        raise RuntimeError(
+            "data/bukhari.json.gz not found and 'requests' is not installed.\n"
+            "Either bundle the data file or run: pip install requests"
+        )
     session = requests.Session()
     meta_r = session.get(f"{CDN_BASE}/meta.json", timeout=30)
     meta_r.raise_for_status()

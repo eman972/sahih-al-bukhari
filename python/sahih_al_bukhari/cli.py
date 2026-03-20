@@ -10,7 +10,7 @@ import time
 
 from .bukhari import Bukhari
 
-VERSION = "3.1.1"
+VERSION = "3.1.2"
 
 RESET = "\x1b[0m"; BOLD = "\x1b[1m"; DIM = "\x1b[2m"
 GREEN = "\x1b[32m"; YELLOW = "\x1b[33m"; CYAN = "\x1b[36m"
