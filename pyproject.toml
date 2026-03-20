@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Religion",
 ]
-packages = [{include = "sahih_al_bukhari"}]
+packages = [{include = "sahih_al_bukhari", from = "python"}]
 include = [
     "bin/bukhari.json",
     "chapters/**/*",

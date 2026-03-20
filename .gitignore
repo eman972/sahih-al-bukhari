@@ -1,6 +1,6 @@
 # JS
 node_modules/
-index.browser.js
+src/index.browser.js
 
 # Python
 __pycache__/

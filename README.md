@@ -1,4 +1,9 @@
 <div align="center">
+
+<img src="https://raw.githubusercontent.com/SENODROOM/sahih-al-bukhari/main/assets/banner.png" alt="Sahih al-Bukhari" width="100%" />
+
+<br />
+
 <h1>
   <img src="https://em-content.zobj.net/source/apple/391/mosque_1f54c.png" width="36" />
   &nbsp;sahih-al-bukhari
@@ -16,9 +21,11 @@
   <a href="https://www.npmjs.com/package/sahih-al-bukhari">
     <img src="https://img.shields.io/npm/v/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm version" />
   </a>
+  &nbsp;
   <a href="https://pypi.org/project/sahih-al-bukhari/">
     <img src="https://img.shields.io/pypi/v/sahih-al-bukhari?style=for-the-badge&logo=pypi&logoColor=white&color=3775A9&labelColor=1a1a1a" alt="PyPI version" />
   </a>
+  &nbsp;
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=gnu&logoColor=white&color=A42E2B&labelColor=1a1a1a" alt="License: AGPL-3.0" />
   </a>
@@ -29,6 +36,11 @@
   <a href="https://www.npmjs.com/package/sahih-al-bukhari">
     <img src="https://img.shields.io/npm/dt/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm downloads" />
   </a>
+  &nbsp;
+  <a href="https://www.npmjs.com/package/sahih-al-bukhari">
+    <img src="https://img.shields.io/npm/dm/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm monthly downloads" />
+  </a>
+  &nbsp;
   <a href="https://pypi.org/project/sahih-al-bukhari/">
     <img src="https://img.shields.io/pypi/dm/sahih-al-bukhari?style=for-the-badge&logo=pypi&logoColor=white&color=3775A9&labelColor=1a1a1a" alt="PyPI monthly downloads" />
   </a>
@@ -39,9 +51,11 @@
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/stargazers">
     <img src="https://img.shields.io/github/stars/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=f0c040&labelColor=1a1a1a" alt="GitHub stars" />
   </a>
+  &nbsp;
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/issues">
     <img src="https://img.shields.io/github/issues/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=238636&labelColor=1a1a1a" alt="GitHub issues" />
   </a>
+  &nbsp;
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/commits/main">
     <img src="https://img.shields.io/github/last-commit/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=8957e5&labelColor=1a1a1a" alt="Last commit" />
   </a>
@@ -50,8 +64,11 @@
 <!-- Row 4: tech -->
 <p>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D14-339933?style=for-the-badge&logo=node.js&logoColor=white&labelColor=1a1a1a" alt="Node.js" />
+  &nbsp;
   <img src="https://img.shields.io/badge/Python-%3E%3D3.8-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a1a" alt="Python" />
+  &nbsp;
   <img src="https://img.shields.io/badge/TypeScript-Typed-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1a1a1a" alt="TypeScript" />
+  &nbsp;
   <img src="https://img.shields.io/badge/Zero-Dependencies-00C853?style=for-the-badge&logoColor=white&labelColor=1a1a1a" alt="Zero dependencies" />
 </p>
 
@@ -65,19 +82,19 @@
 
 ## ✨ Features at a Glance
 
-|     | Feature                 | Details                                                 |
-| --- | ----------------------- | ------------------------------------------------------- |
-| 📚  | **Complete Collection** | All 7,277 authentic hadiths from Sahih al-Bukhari       |
-| 🌐  | **Bilingual**           | Full Arabic text + English translation for every hadith |
-| 📝  | **Chapters**            | 4,000+ chapters with Arabic & English names             |
-| ⚡  | **Tiny Install**        | ~3KB package — data loaded from CDN on demand           |
-| 🔍  | **Full-text Search**    | Search English text and narrator names instantly        |
-| 🖥️  | **CLI**                 | Terminal access with Arabic/English/both flags          |
-| ⚛️  | **React Hook**          | One command generates `useBukhari()` in your project    |
-| 🐍  | **Python**              | Identical API — same method names as the npm package    |
-| 📘  | **TypeScript**          | Full type definitions, zero `@types` package needed     |
-| 🔧  | **Zero Config**         | Works out of the box everywhere                         |
-| 🗄️  | **One Dataset**         | `bin/bukhari.json` shared by both JS and Python         |
+| | Feature | Details |
+|---|---|---|
+| 📚 | **Complete Collection** | All 7,277 authentic hadiths from Sahih al-Bukhari |
+| 🌐 | **Bilingual** | Full Arabic text + English translation for every hadith |
+| 📝 | **Chapters** | 4,000+ chapters with Arabic & English names |
+| ⚡ | **Tiny Install** | ~3KB package — data loaded from CDN on demand |
+| 🔍 | **Full-text Search** | Search English text and narrator names instantly |
+| 🖥️ | **CLI** | Terminal access with Arabic/English/both flags |
+| ⚛️ | **React Hook** | One command generates `useBukhari()` in your project |
+| 🐍 | **Python** | Identical API — same method names as the npm package |
+| 📘 | **TypeScript** | Full type definitions, zero `@types` package needed |
+| 🔧 | **Zero Config** | Works out of the box everywhere |
+| 🗄️ | **One Dataset** | `bin/bukhari.json` shared by both JS and Python |
 
 ---
 
@@ -121,30 +138,30 @@ pip install sahih-al-bukhari
 
 ```javascript
 // CommonJS — require()
-const bukhari = require("sahih-al-bukhari");
+const bukhari = require('sahih-al-bukhari');
 
 // ESM — import
-import bukhari from "sahih-al-bukhari";
+import bukhari from 'sahih-al-bukhari';
 
 // Get by ID
-bukhari.get(1); // → Hadith
+bukhari.get(1)                    // → Hadith
 
 // Get by chapter
-bukhari.getByChapter(1); // → Hadith[]
+bukhari.getByChapter(1)           // → Hadith[]
 
 // Full-text search
-bukhari.search("prayer"); // → Hadith[]
+bukhari.search('prayer')          // → Hadith[]
 
 // Random
-bukhari.getRandom(); // → Hadith
+bukhari.getRandom()               // → Hadith
 
 // Index access
-bukhari[0]; // → Hadith (first)
-bukhari.length; // → 7277
+bukhari[0]                        // → Hadith (first)
+bukhari.length                    // → 7277
 
 // Metadata
-bukhari.metadata; // → { title, author, ... }
-bukhari.chapters; // → Chapter[]
+bukhari.metadata                  // → { title, author, ... }
+bukhari.chapters                  // → Chapter[]
 ```
 
 ### Hadith object shape
@@ -164,11 +181,11 @@ bukhari.chapters; // → Chapter[]
 ### Native array methods — all work
 
 ```javascript
-bukhari.find((h) => h.id === 23);
-bukhari.filter((h) => h.chapterId === 1);
-bukhari.map((h) => h.english.narrator);
-bukhari.forEach((h) => console.log(h.id));
-bukhari.slice(0, 10);
+bukhari.find(h => h.id === 23)
+bukhari.filter(h => h.chapterId === 1)
+bukhari.map(h => h.english.narrator)
+bukhari.forEach(h => console.log(h.id))
+bukhari.slice(0, 10)
 ```
 
 ---
@@ -185,7 +202,7 @@ bukhari --react
 This auto-generates `src/hooks/useBukhari.js`. Then use it anywhere:
 
 ```jsx
-import { useBukhari } from "../hooks/useBukhari";
+import { useBukhari } from '../hooks/useBukhari';
 
 function HadithOfTheDay() {
   const bukhari = useBukhari();
@@ -194,9 +211,7 @@ function HadithOfTheDay() {
   const h = bukhari.getRandom();
   return (
     <div>
-      <p>
-        <strong>{h.english.narrator}</strong>
-      </p>
+      <p><strong>{h.english.narrator}</strong></p>
       <p>{h.english.text}</p>
     </div>
   );
@@ -214,9 +229,9 @@ function HadithSearch() {
     <>
       <input
         placeholder="Search hadiths..."
-        onChange={(e) => setResults(bukhari.search(e.target.value, 10))}
+        onChange={e => setResults(bukhari.search(e.target.value, 10))}
       />
-      {results.map((h) => (
+      {results.map(h => (
         <p key={h.id}>{h.english.text}</p>
       ))}
     </>
@@ -382,10 +397,10 @@ sahih-al-bukhari/
 
 ### Shared data — how it works
 
-| File               | Used by                                                     |
-| ------------------ | ----------------------------------------------------------- |
+| File | Used by |
+|------|---------|
 | `bin/bukhari.json` | JS Node (CJS + ESM) · Python (auto-detected from repo root) |
-| `chapters/`        | JS browser CDN fetch · Python CDN fallback                  |
+| `chapters/` | JS browser CDN fetch · Python CDN fallback |
 
 **You never duplicate data.** Both packages read the exact same file.
 
@@ -395,25 +410,25 @@ sahih-al-bukhari/
 
 ### Methods
 
-| Method                  | JS  | Python | Returns                    |
-| ----------------------- | --- | ------ | -------------------------- |
-| `get(id)`               | ✅  | ✅     | `Hadith \| undefined/None` |
-| `getByChapter(id)`      | ✅  | ✅     | `Hadith[]`                 |
-| `search(query, limit?)` | ✅  | ✅     | `Hadith[]`                 |
-| `getRandom()`           | ✅  | ✅     | `Hadith`                   |
-| `find(predicate)`       | ✅  | ✅     | `Hadith \| undefined/None` |
-| `filter(predicate)`     | ✅  | ✅     | `Hadith[]`                 |
-| `map(fn)`               | ✅  | ✅     | `any[]`                    |
-| `forEach(fn)`           | ✅  | ✅     | `void/None`                |
-| `slice(start, end)`     | ✅  | ✅     | `Hadith[]`                 |
+| Method | JS | Python | Returns |
+|---|---|---|---|
+| `get(id)` | ✅ | ✅ | `Hadith \| undefined/None` |
+| `getByChapter(id)` | ✅ | ✅ | `Hadith[]` |
+| `search(query, limit?)` | ✅ | ✅ | `Hadith[]` |
+| `getRandom()` | ✅ | ✅ | `Hadith` |
+| `find(predicate)` | ✅ | ✅ | `Hadith \| undefined/None` |
+| `filter(predicate)` | ✅ | ✅ | `Hadith[]` |
+| `map(fn)` | ✅ | ✅ | `any[]` |
+| `forEach(fn)` | ✅ | ✅ | `void/None` |
+| `slice(start, end)` | ✅ | ✅ | `Hadith[]` |
 
 ### Properties
 
-| Property   | Type           | Description                 |
-| ---------- | -------------- | --------------------------- |
-| `length`   | `number / int` | Total hadiths — 7,277       |
-| `metadata` | `Metadata`     | Title, author, introduction |
-| `chapters` | `Chapter[]`    | All chapters                |
+| Property | Type | Description |
+|---|---|---|
+| `length` | `number / int` | Total hadiths — 7,277 |
+| `metadata` | `Metadata` | Title, author, introduction |
+| `chapters` | `Chapter[]` | All chapters |
 
 ---
 
@@ -423,17 +438,14 @@ sahih-al-bukhari/
 <summary><strong>Seed a MongoDB database (Node.js)</strong></summary>
 
 ```javascript
-import { MongoClient } from "mongodb";
-import bukhari from "sahih-al-bukhari";
+import { MongoClient } from 'mongodb';
+import bukhari from 'sahih-al-bukhari';
 
 const client = new MongoClient(process.env.MONGO_URI);
 await client.connect();
-await client
-  .db("islam")
-  .collection("hadiths")
-  .insertMany([...bukhari]);
+await client.db('islam').collection('hadiths').insertMany([...bukhari]);
 await client.close();
-console.log("Seeded", bukhari.length, "hadiths");
+console.log('Seeded', bukhari.length, 'hadiths');
 ```
 
 </details>
@@ -471,24 +483,20 @@ for topic in topics:
 <summary><strong>Express.js REST API</strong></summary>
 
 ```javascript
-import express from "express";
-import bukhari from "sahih-al-bukhari";
+import express from 'express';
+import bukhari from 'sahih-al-bukhari';
 
 const app = express();
 
-app.get("/api/hadith/random", (_, res) => res.json(bukhari.getRandom()));
-app.get("/api/hadith/:id", (req, res) => {
+app.get('/api/hadith/random',   (_, res) => res.json(bukhari.getRandom()));
+app.get('/api/hadith/:id',      (req, res) => {
   const h = bukhari.get(parseInt(req.params.id));
-  h ? res.json(h) : res.status(404).json({ error: "Not found" });
+  h ? res.json(h) : res.status(404).json({ error: 'Not found' });
 });
-app.get("/api/search", (req, res) =>
-  res.json(bukhari.search(req.query.q || "")),
-);
-app.get("/api/chapter/:id", (req, res) =>
-  res.json(bukhari.getByChapter(parseInt(req.params.id))),
-);
+app.get('/api/search',          (req, res) => res.json(bukhari.search(req.query.q || '')));
+app.get('/api/chapter/:id',     (req, res) => res.json(bukhari.getByChapter(parseInt(req.params.id))));
 
-app.listen(3000, () => console.log("Running on :3000"));
+app.listen(3000, () => console.log('Running on :3000'));
 ```
 
 </details>

@@ -6,7 +6,7 @@ const fs   = require('fs');
 const path = require('path');
 
 const bukhariData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'bin', 'bukhari.json'), 'utf8')
+  fs.readFileSync(path.join(__dirname, '..', 'bin', 'bukhari.json'), 'utf8')
 );
 
 class Bukhari {

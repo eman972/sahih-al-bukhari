@@ -1,10 +1,7 @@
-# .npmignore
-# Everything listed here is excluded from `npm publish`.
-# npm starts from the "files" whitelist in package.json, so this file is
-# mainly a safety net to strip Python / build artefacts if they slip through.
+# .npmignore — excludes from `npm publish`
 
 # ── Python package ───────────────────────────────────────────────────────────
-sahih_al_bukhari/
+python/
 *.py
 pyproject.toml
 MANIFEST.in
@@ -17,14 +14,19 @@ dist/
 __pycache__/
 *.pyc
 *.pyo
-*.pyd
-.Python
-build/
-
-# ── Virtual environments ──────────────────────────────────────────────────────
 .venv/
 venv/
 env/
+
+# ── docs ───────────────────────────────────────────────────────────
+docs
+docs/
+
+# ── examples ───────────────────────────────────────────────────────────
+examples/
+examples
+examples/flask/
+examples/express/
 
 # ── Dev / CI ──────────────────────────────────────────────────────────────────
 .git/
@@ -32,12 +34,12 @@ env/
 .gitignore
 *.log
 .DS_Store
-Thumbs.db
 .env
-.env.*
 
 # ── JS build inputs (not needed by consumers) ────────────────────────────────
-build.mjs
-build-browser.mjs
+scripts/
 package-lock.json
-.txtconfig
+CHANGELOG.md
+CONTRIBUTING.md
+docs/
+tests/

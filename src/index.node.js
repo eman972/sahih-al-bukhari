@@ -8,7 +8,7 @@ import { Bukhari } from './index.js';
 
 const __dirname   = path.dirname(fileURLToPath(import.meta.url));
 const bukhariData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'bin', 'bukhari.json'), 'utf8')
+  fs.readFileSync(path.join(__dirname, '..', 'bin', 'bukhari.json'), 'utf8')
 );
 
 const bukhari = new Bukhari(bukhariData);
