@@ -14,33 +14,31 @@
 
 <!-- Row 1: version badges -->
 <p>
-  <a href="https://www.npmjs.com/package/sahih-al-bukhari">
+  <a href="https://www.npmjs.com/package/sahih-al-bukhari" text-decoration="none">
     <img src="https://img.shields.io/npm/v/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm version" />
-  </a><a href="https://pypi.org/project/sahih-al-bukhari/">
+  </a><a href="https://pypi.org/project/sahih-al-bukhari/" text-decoration="none">
     <img src="https://img.shields.io/pypi/v/sahih-al-bukhari?style=for-the-badge&logo=pypi&logoColor=white&color=3775A9&labelColor=1a1a1a" alt="PyPI version" />
-  </a><a href="https://github.com/SENODROOM/sahih-al-bukhari/blob/main/LICENSE">
+  </a><a href="https://github.com/SENODROOM/sahih-al-bukhari/blob/main/LICENSE" text-decoration="none">
     <img src="https://img.shields.io/github/license/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=gnu&logoColor=white&color=A42E2B&labelColor=1a1a1a" alt="License: AGPL-3.0" />
   </a>
 </p>
 
 <!-- Row 2: stats -->
 <p>
-  <a href="https://www.npmjs.com/package/sahih-al-bukhari">
+  <a href="https://www.npmjs.com/package/sahih-al-bukhari" text-decoration="none">
     <img src="https://img.shields.io/npm/dt/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm downloads" />
-  </a><a href="https://www.npmjs.com/package/sahih-al-bukhari">
-    <img src="https://img.shields.io/npm/dm/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm monthly downloads" />
-  </a><a href="https://pypi.org/project/sahih-al-bukhari/">
+  </a><a href="https://pypi.org/project/sahih-al-bukhari/" text-decoration="none">
     <img src="https://img.shields.io/pypi/dm/sahih-al-bukhari?style=for-the-badge&logo=pypi&logoColor=white&color=3775A9&labelColor=1a1a1a" alt="PyPI monthly downloads" />
   </a>
 </p>
 
 <!-- Row 3: repo stats -->
 <p>
-  <a href="https://github.com/SENODROOM/sahih-al-bukhari/stargazers">
+  <a href="https://github.com/SENODROOM/sahih-al-bukhari/stargazers" text-decoration="none">
     <img src="https://img.shields.io/github/stars/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=f0c040&labelColor=1a1a1a" alt="GitHub stars" />
-  </a><a href="https://github.com/SENODROOM/sahih-al-bukhari/issues">
+  </a><a href="https://github.com/SENODROOM/sahih-al-bukhari/issues" text-decoration="none">
     <img src="https://img.shields.io/github/issues/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=238636&labelColor=1a1a1a" alt="GitHub issues" />
-  </a><a href="https://github.com/SENODROOM/sahih-al-bukhari/commits/main">
+  </a><a href="https://github.com/SENODROOM/sahih-al-bukhari/commits/main" text-decoration="none">
     <img src="https://img.shields.io/github/last-commit/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=8957e5&labelColor=1a1a1a" alt="Last commit" />
   </a>
 </p>
