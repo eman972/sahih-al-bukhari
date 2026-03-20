@@ -16,11 +16,9 @@
   <a href="https://www.npmjs.com/package/sahih-al-bukhari">
     <img src="https://img.shields.io/npm/v/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm version" />
   </a>
-  &nbsp;
   <a href="https://pypi.org/project/sahih-al-bukhari/">
     <img src="https://img.shields.io/pypi/v/sahih-al-bukhari?style=for-the-badge&logo=pypi&logoColor=white&color=3775A9&labelColor=1a1a1a" alt="PyPI version" />
   </a>
-  &nbsp;
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=gnu&logoColor=white&color=A42E2B&labelColor=1a1a1a" alt="License: AGPL-3.0" />
   </a>
@@ -31,7 +29,6 @@
   <a href="https://www.npmjs.com/package/sahih-al-bukhari">
     <img src="https://img.shields.io/npm/dt/sahih-al-bukhari?style=for-the-badge&logo=npm&logoColor=white&color=CB3837&labelColor=1a1a1a" alt="npm downloads" />
   </a>
-  &nbsp;
   <a href="https://pypi.org/project/sahih-al-bukhari/">
     <img src="https://img.shields.io/pypi/dm/sahih-al-bukhari?style=for-the-badge&logo=pypi&logoColor=white&color=3775A9&labelColor=1a1a1a" alt="PyPI monthly downloads" />
   </a>
@@ -42,11 +39,9 @@
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/stargazers">
     <img src="https://img.shields.io/github/stars/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=f0c040&labelColor=1a1a1a" alt="GitHub stars" />
   </a>
-  &nbsp;
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/issues">
     <img src="https://img.shields.io/github/issues/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=238636&labelColor=1a1a1a" alt="GitHub issues" />
   </a>
-  &nbsp;
   <a href="https://github.com/SENODROOM/sahih-al-bukhari/commits/main">
     <img src="https://img.shields.io/github/last-commit/SENODROOM/sahih-al-bukhari?style=for-the-badge&logo=github&logoColor=white&color=8957e5&labelColor=1a1a1a" alt="Last commit" />
   </a>
@@ -55,11 +50,8 @@
 <!-- Row 4: tech -->
 <p>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D14-339933?style=for-the-badge&logo=node.js&logoColor=white&labelColor=1a1a1a" alt="Node.js" />
-  &nbsp;
   <img src="https://img.shields.io/badge/Python-%3E%3D3.8-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a1a" alt="Python" />
-  &nbsp;
   <img src="https://img.shields.io/badge/TypeScript-Typed-3178C6?style=for-the-badge&logo=typescript&logoColor=white&labelColor=1a1a1a" alt="TypeScript" />
-  &nbsp;
   <img src="https://img.shields.io/badge/Zero-Dependencies-00C853?style=for-the-badge&logoColor=white&labelColor=1a1a1a" alt="Zero dependencies" />
 </p>
 
