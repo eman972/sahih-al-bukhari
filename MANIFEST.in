@@ -1,0 +1,33 @@
+# MANIFEST.in
+# Controls what gets included in the Python sdist (source distribution).
+# The wheel picks up whatever pyproject.toml declares; this file covers sdist.
+
+# ── Include shared data files ────────────────────────────────────────────────
+include bin/bukhari.json
+recursive-include chapters *.json
+
+# ── Include standard text files ──────────────────────────────────────────────
+include README.md
+include LICENSE
+include pyproject.toml
+
+# ── Exclude ALL JavaScript / npm files ───────────────────────────────────────
+# JS entry points
+exclude index.js
+exclude index.browser.js
+exclude index.cjs
+exclude index.node.js
+exclude index.d.ts
+
+# npm tooling & config
+exclude package.json
+exclude package-lock.json
+exclude build.mjs
+exclude .npmignore
+exclude .gitignore
+
+# JS CLI (keep bin/bukhari.json but drop bin/index.js)
+exclude bin/index.js
+
+# node_modules if accidentally present
+prune node_modules

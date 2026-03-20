@@ -1,6 +1,7 @@
 // node build.mjs
-// 1. Splits bukhari.json into chapters/ folder (one file per chapter)
-// 2. Writes a clean index.browser.js
+// 1. Splits bin/bukhari.json into chapters/ folder (one file per chapter)
+//    — chapters/ is shared with the Python package
+// 2. Writes index.browser.js
 
 import fs   from 'fs';
 import path from 'path';
@@ -30,6 +31,7 @@ for (const [id, hadiths] of Object.entries(byChapter)) {
   count++;
 }
 console.log(`✓ Written ${count} chapter files → chapters/`);
+console.log('  (chapters/ is shared between the JS and Python packages)');
 
 // ── 3. index.browser.js ───────────────────────────────────────────────────────
 const CDN_VERSION = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version;
@@ -61,7 +63,6 @@ export class Bukhari {
   }
 }
 
-// Single shared promise — only fetches once no matter how many imports
 let _cache   = null;
 let _promise = null;
 
@@ -79,11 +80,10 @@ export function loadBukhari() {
   return _promise;
 }
 
-// Default export: plain promise
 export default loadBukhari();
 `;
 
 fs.writeFileSync(path.join(__dirname, 'index.browser.js'), browserSrc, 'utf8');
-console.log(`✓ Written index.browser.js (${(browserSrc.length / 1024).toFixed(1)} KB — lightweight)`);
+console.log(`✓ Written index.browser.js`);
 console.log('');
 console.log('Build complete!');
