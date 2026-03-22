@@ -6,7 +6,7 @@ setlocal enabledelayedexpansion
 
 set "APP_HOME=%~dp0"
 set "WRAPPER_JAR=%APP_HOME%gradle\wrapper\gradle-wrapper.jar"
-set "REAL_JAR_URL=https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradle/wrapper/gradle-wrapper.jar"
+set "REAL_JAR_URL=https://raw.githubusercontent.com/gradle/gradle/v8.8.0/gradle/wrapper/gradle-wrapper.jar"
 
 @rem ── Auto-download real wrapper JAR if stub is present ─────────────────────
 if exist "%WRAPPER_JAR%" (
