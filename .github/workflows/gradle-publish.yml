@@ -29,8 +29,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4.3.1
 
       - name: Make gradlew executable
-        working-directory: java
-        run: chmod +x gradlew
+        run: |
+          chmod +x java/gradlew
+          git update-index --chmod=+x java/gradlew
 
       - name: Build and test
         working-directory: java
