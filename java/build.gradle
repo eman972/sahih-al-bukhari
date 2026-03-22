@@ -138,12 +138,11 @@ signing {
 }
 
 // ── Sonatype Central Portal publishing ────────────────────────────────────────
-// Uses the official central-portal-publisher plugin which handles the new
-// Central Portal API (replaces the defunct s01.oss.sonatype.org endpoint).
-sonatypeCentralUpload {
-    username    = System.getenv('OSSRH_USERNAME') ?: findProperty('ossrhUsername') ?: ''
-    password    = System.getenv('OSSRH_PASSWORD') ?: findProperty('ossrhPassword') ?: ''
-    signingKey  = System.getenv('GPG_SIGNING_KEY') ?: findProperty('signingKey') ?: ''
-    signingKeyPassphrase = System.getenv('GPG_PASSPHRASE') ?: findProperty('signingPassword') ?: ''
-    publishingType = 'AUTOMATIC'
+// nmcp (New Maven Central Publishing) plugin — correct config block is `nmcp {}`
+nmcp {
+    publishAllPublicationsToCentralPortal {
+        username       = System.getenv('OSSRH_USERNAME') ?: findProperty('ossrhUsername') ?: ''
+        password       = System.getenv('OSSRH_PASSWORD') ?: findProperty('ossrhPassword') ?: ''
+        publishingType = 'AUTOMATIC'
+    }
 }
