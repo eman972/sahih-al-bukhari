@@ -40,7 +40,7 @@ sourceSets {
 }
 
 // Keep first copy if duplicates still slip through (e.g. IDE builds)
-tasks.named('processResources') {
+tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
