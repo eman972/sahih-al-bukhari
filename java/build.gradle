@@ -1,0 +1,142 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group   = 'io.github.senodroom'
+version = '3.1.5'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 11
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+// ── Data file: pulled from ../data automatically — no manual copy needed ──────
+//
+// Only ../data is the authoritative source for bukhari.json.gz.
+// We explicitly exclude it from src/main/resources to prevent duplicates
+// if copy-data-java.mjs was run manually before the build.
+sourceSets {
+    main {
+        resources {
+            srcDir file("${project.projectDir}/../data")
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+// Keep first copy if duplicates still slip through (e.g. IDE builds)
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.11.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showStandardStreams = false
+    }
+}
+
+// ── Fat-JAR / CLI ─────────────────────────────────────────────────────────────
+// Build:   ./gradlew shadowJar
+// Execute: java -jar build/libs/sahih-al-bukhari-3.1.5-all.jar --random
+shadowJar {
+    archiveClassifier = 'all'
+    manifest {
+        attributes 'Main-Class': 'com.bukhari.BukhariCli'
+    }
+    relocate 'com.google.gson', 'com.bukhari.shadow.gson'
+    mergeServiceFiles()
+}
+
+// ── Publishing ────────────────────────────────────────────────────────────────
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name        = 'Sahih al-Bukhari'
+                description = 'Complete Sahih al-Bukhari - 7,277 authentic hadiths with full ' +
+                              'Arabic text and English translations. Offline-first, minimal ' +
+                              'dependencies. Same API as the npm and PyPI packages.'
+                url         = 'https://github.com/SENODROOM/sahih-al-bukhari'
+
+                licenses {
+                    license {
+                        name         = 'GNU Affero General Public License v3.0'
+                        url          = 'https://www.gnu.org/licenses/agpl-3.0.html'
+                        distribution = 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id   = 'muhammadsaadamin'
+                        name = 'Muhammad Saad Amin'
+                        url  = 'https://github.com/SENODROOM'
+                    }
+                }
+
+                scm {
+                    url                 = 'https://github.com/SENODROOM/sahih-al-bukhari'
+                    connection          = 'scm:git:git://github.com/SENODROOM/sahih-al-bukhari.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/SENODROOM/sahih-al-bukhari.git'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'OSSRH'
+            url  = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = findProperty('ossrhUsername') ?: System.getenv('OSSRH_USERNAME') ?: ''
+                password = findProperty('ossrhPassword') ?: System.getenv('OSSRH_PASSWORD') ?: ''
+            }
+        }
+        maven {
+            name = 'localStaging'
+            url  = layout.buildDirectory.dir('staging-deploy')
+        }
+    }
+}
+
+// ── GPG Signing ───────────────────────────────────────────────────────────────
+// Signing is SKIPPED for local builds (mvn clean verify / ./gradlew build).
+// It only activates when the `publish` or `publishToMavenLocal` task is run,
+// AND when the signing key env vars are present (set in CI secrets).
+signing {
+    def signingKey      = findProperty('signingKey')      ?: System.getenv('GPG_SIGNING_KEY')
+    def signingPassword = findProperty('signingPassword') ?: System.getenv('GPG_PASSPHRASE')
+    if (signingKey && signingPassword) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign publishing.publications.mavenJava
+    }
+    // If no key is configured, signing is simply skipped — no error.
+}

@@ -1,0 +1,68 @@
+name: Publish Java to Maven Central
+
+on:
+  release:
+    types: [published]
+  # Allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build + test only, no publish)'
+        required: false
+        default: 'false'
+
+jobs:
+  publish:
+    name: Build, Test & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Java 11 ─────────────────────────────────────────────────────────
+      - name: Set up Java 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          # These inject credentials into Maven's settings.xml for the
+          # `central` server referenced in central-publishing-maven-plugin
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      # ── 3. Copy bundled data into Java resources ───────────────────────────
+      - name: Copy bukhari.json.gz into Java resources
+        run: |
+          mkdir -p java/src/main/resources
+          cp data/bukhari.json.gz java/src/main/resources/bukhari.json.gz
+
+      # ── 4. Build & test ────────────────────────────────────────────────────
+      - name: Build and test (Maven)
+        working-directory: java
+        run: mvn --batch-mode --no-transfer-progress clean verify
+
+      # ── 5. Publish to Maven Central ────────────────────────────────────────
+      - name: Publish to Maven Central
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        working-directory: java
+        run: mvn --batch-mode --no-transfer-progress deploy -P release -DskipTests
+        env:
+          MAVEN_USERNAME:      ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD:      ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+      # ── 6. Upload fat-JAR as release asset ────────────────────────────────
+      - name: Build fat-JAR (CLI)
+        working-directory: java
+        run: mvn --batch-mode --no-transfer-progress package -P fat-jar -DskipTests
+
+      - name: Upload fat-JAR to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: java/target/sahih-al-bukhari-*-fat.jar

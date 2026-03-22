@@ -1,0 +1,37 @@
+# ── Build output ─────────────────────────────────────────────────────────────
+target/
+build/
+out/
+*.class
+
+# ── Gradle ────────────────────────────────────────────────────────────────────
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# ── Maven ─────────────────────────────────────────────────────────────────────
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+*.code-workspace
+
+# ── Bundled data (generated — not committed) ──────────────────────────────────
+src/main/resources/bukhari.json.gz
+src/main/resources/bukhari.json
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Secrets / local overrides ─────────────────────────────────────────────────
+# gradle.properties may contain real secrets locally — only commit the template
+# gradle.properties   ← uncomment this line if you put real secrets in it
