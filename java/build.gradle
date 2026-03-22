@@ -140,9 +140,12 @@ signing {
 // ── Sonatype Central Portal publishing ────────────────────────────────────────
 // nmcp (New Maven Central Publishing) plugin — correct config block is `nmcp {}`
 nmcp {
-    publishAllPublicationsToCentralPortal {
-        username       = System.getenv('OSSRH_USERNAME') ?: findProperty('ossrhUsername') ?: ''
-        password       = System.getenv('OSSRH_PASSWORD') ?: findProperty('ossrhPassword') ?: ''
-        publishingType = 'AUTOMATIC'
+    repositories {
+        centralPortal {
+            username = System.getenv('OSSRH_USERNAME') ?: findProperty('ossrhUsername') ?: ''
+            password = System.getenv('OSSRH_PASSWORD') ?: findProperty('ossrhPassword') ?: ''
+        }
     }
+
+    publishingType = 'AUTOMATIC'
 }
