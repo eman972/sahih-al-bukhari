@@ -33,15 +33,21 @@ tasks.withType(Javadoc).configureEach {
 sourceSets {
     main {
         resources {
+            // Pull bukhari.json.gz from the monorepo data/ folder
             srcDir file("${project.projectDir}/../data")
-            srcDir 'src/main/resources'
+            include 'bukhari.json.gz'
+            include 'bukhari.json'
         }
     }
 }
 
-// Keep first copy if duplicates still slip through (e.g. IDE builds)
+// src/main/resources is added separately so we can exclude README.txt
+// which would otherwise duplicate when sourcesJar scans both dirs
+sourceSets.main.resources.srcDir('src/main/resources')
+
 tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude 'README.txt'
 }
 
 repositories {
