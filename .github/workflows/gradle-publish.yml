@@ -40,7 +40,7 @@ jobs:
       - name: Publish to Maven Central
         if: ${{ github.event.inputs.dry_run != 'true' }}
         working-directory: java
-        run: ./gradlew publish -x test
+        run: ./gradlew publishAllPublicationsToCentralPortal -x test
         env:
           OSSRH_USERNAME:  ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD:  ${{ secrets.OSSRH_PASSWORD }}
