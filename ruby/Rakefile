@@ -1,0 +1,66 @@
+# frozen_string_literal: true
+
+require 'bundler/gem_tasks'
+require 'rspec/core/rake_task'
+require 'yard'
+
+RSpec::Core::RakeTask.new(:spec)
+
+YARD::Rake::YardocTask.new do |t|
+  t.files = ['lib/**/*.rb', '-', 'README.md']
+  t.options = ['--markup', 'markdown']
+end
+
+task default: :spec
+
+# Custom tasks
+namespace :bukhari do
+  desc 'Download and prepare data files'
+  task :prepare_data do
+    require_relative 'lib/sahih_al_bukhari'
+    
+    data_dir = File.join(__dir__, 'data')
+    FileUtils.mkdir_p(data_dir) unless Dir.exist?(data_dir)
+    
+    puts 'Downloading data files...'
+    begin
+      bukhari = SahihAlBukhari::Bukhari.new
+      puts 'Data files prepared successfully!'
+    rescue => e
+      puts "Error preparing data: #{e.message}"
+      exit 1
+    end
+  end
+
+  desc 'Test the CLI'
+  task :test_cli do
+    cli_path = File.join(__dir__, 'bin', 'bukhari')
+    system("ruby #{cli_path} --version")
+    system("ruby #{cli_path} --help")
+  end
+
+  desc 'Run basic functionality test'
+  task :test_basic do
+    require_relative 'lib/sahih_al_bukhari'
+    
+    puts 'Testing basic functionality...'
+    bukhari = SahihAlBukhari::Bukhari.new
+    
+    puts "Total hadiths: #{bukhari.length}"
+    puts "Total chapters: #{bukhari.chapters.length}"
+    
+    # Test getting first hadith
+    hadith = bukhari.get(1)
+    puts "First hadith: #{hadith.number}"
+    
+    # Test search
+    results = bukhari.search('prayer')
+    puts "Search results for 'prayer': #{results.length}"
+    
+    # Test random
+    random = bukhari.get_random
+    puts "Random hadith: #{random.number}"
+    
+    puts 'All tests passed!'
+  end
+end

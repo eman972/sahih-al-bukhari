@@ -1,0 +1,262 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# CLI for sahih-al-bukhari (Ruby package)
+
+require 'optparse'
+require 'json'
+require_relative '../sahih_al_bukhari'
+
+VERSION = SahihAlBukhari::VERSION
+
+# ANSI color codes
+module Colors
+  RESET = "\e[0m"
+  BOLD = "\e[1m"
+  DIM = "\e[2m"
+  GREEN = "\e[32m"
+  YELLOW = "\e[33m"
+  CYAN = "\e[36m"
+  MAGENTA = "\e[35m"
+  BLUE = "\e[34m"
+  RED = "\e[31m"
+  GRAY = "\e[90m"
+
+  def self.color(code, text)
+    "#{code}#{text}#{RESET}"
+  end
+
+  def self.bold(text); color(BOLD, text); end
+  def self.green(text); color(GREEN, text); end
+  def self.yellow(text); color(YELLOW, text); end
+  def self.cyan(text); color(CYAN, text); end
+  def self.magenta(text); color(MAGENTA, text); end
+  def self.blue(text); color(BLUE, text); end
+  def self.red(text); color(RED, text); end
+  def self.gray(text); color(GRAY, text); end
+  def self.dim(text); color(DIM, text); end
+end
+
+DIV = Colors.gray('─' * 60)
+
+def format_hadith(hadith, show_chapter: false)
+  output = []
+  output << Colors.bold("Hadith #{hadith.number}")
+  
+  if show_chapter
+    chapter = bukhari.chapters.find { |c| c.id == hadith.chapter_id }
+    output << Colors.cyan("Chapter #{chapter.id}: #{chapter.title}") if chapter
+  end
+  
+  output << ""
+  output << Colors.bold("Arabic:")
+  output << hadith.arabic
+  output << ""
+  output << Colors.bold("English:")
+  output << hadith.english
+  
+  output.join("\n")
+end
+
+def format_chapter(chapter)
+  output = []
+  output << Colors.bold("Chapter #{chapter.id}: #{chapter.title}")
+  output << Colors.dim(chapter.arabic_title)
+  output.join("\n")
+end
+
+def print_hadith(hadith, show_chapter: false)
+  puts DIV
+  puts format_hadith(hadith, show_chapter: show_chapter)
+  puts DIV
+  puts
+end
+
+def print_chapter(chapter)
+  puts DIV
+  puts format_chapter(chapter)
+  puts DIV
+  puts
+end
+
+def print_list(items, title)
+  puts Colors.bold("#{title} (#{items.length}):")
+  puts
+  items.each { |item| puts "  #{item}" }
+  puts
+end
+
+# Parse command line arguments
+options = {
+  number: nil,
+  chapter: nil,
+  search: nil,
+  random: false,
+  list_chapters: false,
+  metadata: false,
+  json: false,
+  chapter_info: false,
+  limit: 10
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: bukhari [options]"
+  
+  opts.on("-n", "--number NUMBER", Integer, "Get specific hadith by number") do |n|
+    options[:number] = n
+  end
+  
+  opts.on("-c", "--chapter CHAPTER", Integer, "Get hadiths from specific chapter") do |c|
+    options[:chapter] = c
+  end
+  
+  opts.on("-s", "--search QUERY", "Search hadiths") do |q|
+    options[:search] = q
+  end
+  
+  opts.on("-r", "--random", "Get random hadith") do
+    options[:random] = true
+  end
+  
+  opts.on("-l", "--list-chapters", "List all chapters") do
+    options[:list_chapters] = true
+  end
+  
+  opts.on("-m", "--metadata", "Show collection metadata") do
+    options[:metadata] = true
+  end
+  
+  opts.on("-j", "--json", "Output as JSON") do
+    options[:json] = true
+  end
+  
+  opts.on("--chapter-info", "Show chapter info with hadiths") do
+    options[:chapter_info] = true
+  end
+  
+  opts.on("--limit LIMIT", Integer, "Limit search results (default: 10)") do |l|
+    options[:limit] = l
+  end
+  
+  opts.on("-v", "--version", "Show version") do
+    puts "bukhari #{VERSION}"
+    exit
+  end
+  
+  opts.on("-h", "--help", "Show this help") do
+    puts opts
+    puts
+    puts Colors.bold("Examples:")
+    puts "  bukhari -n 1                    # Get hadith #1"
+    puts "  bukhari -c 1                    # Get hadiths from chapter 1"
+    puts "  bukhari -s prayer               # Search for 'prayer'"
+    puts "  bukhari -r                      # Get random hadith"
+    puts "  bukhari -l                      # List chapters"
+    puts "  bukhari -m                      # Show metadata"
+    puts "  bukhari -s prayer --limit 5     # Search with limit"
+    puts "  bukhari -n 1 --json             # Output as JSON"
+    exit
+  end
+end
+
+begin
+  parser.parse!
+rescue OptionParser::InvalidOption => e
+  puts Colors.red("Error: #{e.message}")
+  puts parser
+  exit 1
+end
+
+# Initialize Bukhari instance
+begin
+  $bukhari = SahihAlBukhari::Bukhari.new
+rescue SahihAlBukhari::Error => e
+  puts Colors.red("Error: #{e.message}")
+  exit 1
+end
+
+# Execute commands
+if options[:number]
+  begin
+    hadith = $bukhari.get(options[:number])
+    if options[:json]
+      puts hadith.to_json
+    else
+      print_hadith(hadith, show_chapter: options[:chapter_info])
+    end
+  rescue SahihAlBukhari::HadithNotFoundError => e
+    puts Colors.red("Error: #{e.message}")
+    exit 1
+  end
+elsif options[:chapter]
+  begin
+    hadiths = $bukhari.get_by_chapter(options[:chapter])
+    if options[:json]
+      puts hadiths.map(&:to_h).to_json
+    else
+      chapter = $bukhari.chapters.find { |c| c.id == options[:chapter] }
+      if chapter
+        print_chapter(chapter)
+        puts Colors.bold("Hadiths in this chapter (#{hadiths.length}):")
+        puts
+      end
+      
+      hadiths.each { |h| print_hadith(h) }
+    end
+  rescue SahihAlBukhari::ChapterNotFoundError => e
+    puts Colors.red("Error: #{e.message}")
+    exit 1
+  end
+elsif options[:search]
+  results = $bukhari.search(options[:search])
+  limited_results = results.first(options[:limit])
+  
+  if options[:json]
+    puts limited_results.map(&:to_h).to_json
+  else
+    if results.empty?
+      puts Colors.yellow("No hadiths found for '#{options[:search]}'")
+    else
+      puts Colors.bold("Found #{results.length} hadith(s) matching '#{options[:search]}'")
+      puts Colors.dim("Showing first #{limited_results.length}:") if results.length > options[:limit]
+      puts
+      
+      limited_results.each { |h| print_hadith(h) }
+    end
+  end
+elsif options[:random]
+  hadith = $bukhari.get_random
+  if options[:json]
+    puts hadith.to_json
+  else
+    print_hadith(hadith, show_chapter: options[:chapter_info])
+  end
+elsif options[:list_chapters]
+  if options[:json]
+    puts $bukhari.chapters.map(&:to_h).to_json
+  else
+    puts Colors.bold("Chapters in Sahih al-Bukhari:")
+    puts
+    $bukhari.chapters.each { |c| print_chapter(c) }
+  end
+elsif options[:metadata]
+  if options[:json]
+    puts $bukhari.metadata.to_h.to_json
+  else
+    puts Colors.bold("Sahih al-Bukhari Collection Metadata:")
+    puts
+    metadata = $bukhari.metadata
+    puts "  Total Hadiths: #{Colors.green(metadata.total_hadiths.to_s)}"
+    puts "  Total Chapters: #{Colors.green(metadata.total_chapters.to_s)}"
+    puts "  Language: #{Colors.cyan(metadata.language)}"
+    puts "  Source: #{Colors.dim(metadata.source)}"
+    puts
+  end
+else
+  # Default: show help
+  puts parser
+  puts Colors.bold("Quick start:")
+  puts "  bukhari -r                      # Get a random hadith"
+  puts "  bukhari -s prayer               # Search for hadiths about prayer"
+  puts "  bukhari -l                      # List all chapters"
+end
