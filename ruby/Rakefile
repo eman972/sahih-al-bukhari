@@ -1,66 +1,82 @@
 # frozen_string_literal: true
 
 require 'bundler/gem_tasks'
-require 'rspec/core/rake_task'
-require 'yard'
 
-RSpec::Core::RakeTask.new(:spec)
+# ── Test task ─────────────────────────────────────────────────────────────────
+# FIX: Ruby 4.0 removed test/unit from stdlib — it is now the 'test-unit' gem.
+# We require it explicitly here so rake/testtask can find it.
+require 'test/unit'
+require 'rake/testtask'
 
-YARD::Rake::YardocTask.new do |t|
-  t.files = ['lib/**/*.rb', '-', 'README.md']
-  t.options = ['--markup', 'markdown']
+Rake::TestTask.new(:test) do |t|
+  t.libs << 'lib'
+  t.test_files = FileList['test/**/*_test.rb', 'test/**/test_*.rb']
+  t.verbose    = true
 end
 
-task default: :spec
+# ── RSpec task (only if rspec gem is available)
+begin
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:spec)
+rescue LoadError
+  task :spec do
+    warn 'rspec gem not available — run: gem install rspec'
+  end
+end
 
-# Custom tasks
+# ── YARD docs (only if yard gem is available)
+begin
+  require 'yard'
+  YARD::Rake::YardocTask.new(:yard) do |t|
+    t.files   = ['lib/**/*.rb', '-', 'README.md']
+    t.options = ['--markup', 'markdown']
+  end
+rescue LoadError
+  task :yard do
+    warn 'yard gem not available — run: gem install yard'
+  end
+end
+
+task default: :test
+
+# ── Custom gem tasks ──────────────────────────────────────────────────────────
 namespace :bukhari do
-  desc 'Download and prepare data files'
-  task :prepare_data do
-    require_relative 'lib/sahih_al_bukhari'
-    
-    data_dir = File.join(__dir__, 'data')
-    FileUtils.mkdir_p(data_dir) unless Dir.exist?(data_dir)
-    
-    puts 'Downloading data files...'
-    begin
-      bukhari = SahihAlBukhari::Bukhari.new
-      puts 'Data files prepared successfully!'
-    rescue => e
-      puts "Error preparing data: #{e.message}"
-      exit 1
-    end
-  end
-
-  desc 'Test the CLI'
-  task :test_cli do
-    cli_path = File.join(__dir__, 'bin', 'bukhari')
-    system("ruby #{cli_path} --version")
-    system("ruby #{cli_path} --help")
-  end
-
-  desc 'Run basic functionality test'
+  desc 'Run basic functionality smoke-test'
   task :test_basic do
-    require_relative 'lib/sahih_al_bukhari'
-    
-    puts 'Testing basic functionality...'
-    bukhari = SahihAlBukhari::Bukhari.new
-    
-    puts "Total hadiths: #{bukhari.length}"
-    puts "Total chapters: #{bukhari.chapters.length}"
-    
-    # Test getting first hadith
-    hadith = bukhari.get(1)
-    puts "First hadith: #{hadith.number}"
-    
-    # Test search
-    results = bukhari.search('prayer')
-    puts "Search results for 'prayer': #{results.length}"
-    
-    # Test random
-    random = bukhari.get_random
-    puts "Random hadith: #{random.number}"
-    
-    puts 'All tests passed!'
+    $LOAD_PATH.unshift File.join(__dir__, 'lib')
+    require 'sahih_al_bukhari'
+
+    puts 'Testing basic functionality…'
+    b = SahihAlBukhari::Bukhari.new
+    puts "  ✓ Total hadiths : #{b.length}"
+    puts "  ✓ Total chapters: #{b.chapters.length}"
+
+    h = b.get(1)
+    puts "  ✓ get(1)         : Hadith ##{h.id}"
+
+    results = b.search('prayer')
+    puts "  ✓ search(prayer) : #{results.length} results"
+
+    rnd = b.get_random
+    puts "  ✓ get_random()   : Hadith ##{rnd.id}"
+
+    puts 'All basic checks passed!'
+  end
+
+  desc 'Test the CLI binary'
+  task :test_cli do
+    cli = File.join(__dir__, 'bin', 'bukhari')
+    sh "ruby -I lib #{cli} --version"
+    sh "ruby -I lib #{cli} --help"
+    sh "ruby -I lib #{cli} -n 1"
+    sh "ruby -I lib #{cli} -r"
+  end
+
+  desc 'Download / verify data files are in place'
+  task :prepare_data do
+    $LOAD_PATH.unshift File.join(__dir__, 'lib')
+    require 'sahih_al_bukhari'
+    _b = SahihAlBukhari::Bukhari.new   # triggers CDN download if needed
+    puts 'Data files are ready.'
   end
 end

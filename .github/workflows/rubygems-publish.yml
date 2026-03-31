@@ -1,0 +1,67 @@
+name: Publish Ruby Gem to RubyGems.org
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (build + test only, no publish)'
+        required: false
+        default: 'false'
+
+jobs:
+  publish-gem:
+    name: Build, Test & Publish
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ruby
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Ruby setup ────────────────────────────────────────────────────────
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true   # runs `bundle install` and caches gems
+
+      # ── 3. Copy shared data file into the ruby/data/ directory ───────────────
+      #    The gemspec includes ruby/data/bukhari.json.gz in spec.files.
+      #    The data lives at repo root: data/bukhari.json.gz
+      - name: Copy bundled data into ruby/data/
+        run: |
+          mkdir -p data
+          cp ../data/bukhari.json.gz data/bukhari.json.gz
+
+      # ── 4. Run tests ─────────────────────────────────────────────────────────
+      - name: Run tests
+        run: bundle exec rake test
+
+      # ── 5. Build gem ─────────────────────────────────────────────────────────
+      - name: Build gem
+        run: gem build sahih_al_bukhari.gemspec
+
+      # ── 6. Publish (skipped on dry run) ──────────────────────────────────────
+      - name: Publish to RubyGems.org
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          mkdir -p ~/.gem
+          cat > ~/.gem/credentials << EOF
+          ---
+          :rubygems_api_key: ${{ secrets.RUBYGEMS_API_KEY }}
+          EOF
+          chmod 0600 ~/.gem/credentials
+          gem push sahih-al-bukhari-*.gem
+
+      # ── 7. Upload .gem as release asset ──────────────────────────────────────
+      - name: Upload .gem to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ruby/sahih-al-bukhari-*.gem
